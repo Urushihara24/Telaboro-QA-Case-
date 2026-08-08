@@ -1,0 +1,46 @@
+# NB-014: Краш TechnicianProfileScreen — Property 'country' doesn't exist
+# Устройство: Nothing Phone 1, Android 15 | Telaboro v2.1.0
+# Сценарий: клиент открывает публичный профиль мастера из котировки
+
+2026-08-04 01:00:52.377 14333-14333 [RNScreens]             com.telaboro.app  W  backTitleVisible prop is not available on Android
+2026-08-04 01:00:52.377 14333-14333 [RNScreens]             com.telaboro.app  W  backTitleFontFamily prop is not available on Android
+2026-08-04 01:00:52.377 14333-14333 [RNScreens]             com.telaboro.app  W  disableBackButtonMenu prop is not available on Android
+2026-08-04 01:00:52.377 14333-14333 [RNScreens]             com.telaboro.app  W  largeTitleFontFamily prop is not available on Android
+2026-08-04 01:00:52.377 14333-14333 [RNScreens]             com.telaboro.app  W  largeTitleFontWeight prop is not available on Android
+2026-08-04 01:00:52.377 14333-14333 [RNScreens]             com.telaboro.app  W  largeTitleHideShadow prop is not available on Android
+
+# >>> Предупреждение: UI обновляется из неправильного потока <<<
+2026-08-04 01:00:52.613 14333-14360 ViewRootImpl            com.telaboro.app  E  Attempt to call method from wrong thread. This will throw an exception in a future version.
+android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views. Expected: main Calling: mqt_v_js
+	at android.view.ViewRootImpl.newCalledFromWrongThreadException(ViewRootImpl.java:12155)
+	at android.view.ViewRootImpl.checkThreadCompat(ViewRootImpl.java:12193)
+	at android.view.ViewRootImpl.scheduleTraversals(ViewRootImpl.java:3308)
+	at android.view.ViewRootImpl.invalidate(ViewRootImpl.java:2867)
+	at android.view.View.invalidate(View.java:21450)
+	at android.view.ViewGroup.addView(ViewGroup.java:5252)
+	at com.swmansion.rnscreens.Screen.startTransitionRecursive(Screen.kt:501)
+	at com.swmansion.rnscreens.Screen.startRemovalTransition(Screen.kt:463)
+	at com.swmansion.rnscreens.NativeProxy.notifyScreenRemoved(NativeProxy.kt:64)
+
+# >>> КЛЮЧЕВАЯ ОШИБКА: краш компонента профиля <<<
+2026-08-04 01:00:52.636 14333-14360 ReactNativeJS           com.telaboro.app  E  { [ReferenceError: Property 'country' doesn't exist]
+2026-08-04 01:00:52.636 14333-14360 ReactNativeJS           com.telaboro.app  E    componentStack: '\n    at TechnicianProfileScreen (address at index.android.bundle:1:3060116)\n    at Suspense (<anonymous>)\n    at Route (address at index.android.bundle:1:976662)\n    at BaseRoute (address at index.android.bundle:1:983558)\n    ...'
+2026-08-04 01:00:52.636 14333-14360 ReactNativeJS           com.telaboro.app  E    isComponentError: true }
+2026-08-04 01:00:52.638 14333-14361 unknown:ReactNative     com.telaboro.app  E  ReferenceError: Property 'country' doesn't exist
+    This error is located at:
+        at TechnicianProfileScreen (address at index.android.bundle:1:3060116)
+        at Suspense (<anonymous>)
+        at Route (address at index.android.bundle:1:976662)
+        ...
+    stack:
+        TechnicianProfileScreen@1:3062635
+        renderWithHooks@1:281292
+        updateFunctionComponent@1:300121
+        beginWork@1:308005
+        performUnitOfWork@1:326685
+        workLoopSync@1:325693
+        renderRootSync@1:325525
+        performWorkOnRoot@1:323169
+
+# Итог: ErrorBoundary показывает экран 'Something went wrong — Property country
+# doesn't exist' с кнопкой Retry. Retry не помогает (данные API не меняются).
