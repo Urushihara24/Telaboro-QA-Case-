@@ -1,0 +1,23 @@
+# NB-003: React Native теряет результат Stripe PaymentLauncher
+# Устройство: Nothing Phone 1, Android 15 | Telaboro v2.1.0
+# Сценарий: клиент оплачивает задачу (Diagnosis $150.00) через Stripe Checkout
+
+2026-08-04 01:05:36.561 14333-14333 StripeReactNative       com.telaboro.app  E  Unable to set card brand tint color: com.stripe.android.view.CardBrandView.setTintColorInt$payments_core_release [int]
+2026-08-04 01:05:39.153  6682-6682  GoogleInpu...hodService com...gle.android.inputmethod.latin  I  onStartInput(EditorInfo{packageName=com.telaboro.app, inputType=200012, inputTypeString=NumberPassword, ...})
+2026-08-04 01:05:51.845   668-1916  BiometricS...reAuthInfo system_server  D  Package: com.telaboro.app Sensor ID: 0 Modality: 2 User id: 0 Status: 7
+2026-08-04 01:05:51.857   668-1916  ActivityTaskManager     system_server  I  START u0 {xflg=0x4 cmp=com.telaboro.app/com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity (has extras)} with LAUNCH_MULTIPLE from uid 10234 (com.telaboro.app) result code=0
+2026-08-04 01:05:51.860 14333-14333 unknown:BridgelessReact com.telaboro.app  W  ReactHost{0}.onUserLeaveHint(activity)
+2026-08-04 01:05:51.863 14333-14333 unknown:BridgelessReact com.telaboro.app  W  ReactHost{0}.onHostPause(activity)
+2026-08-04 01:05:51.864 14333-14333 unknown:BridgelessReact com.telaboro.app  W  ReactContext.onHostPause()
+2026-08-04 01:05:51.932   668-690   ActivityTaskManager     system_server  I  Displayed com.telaboro.app/com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity for user 0: +78ms
+2026-08-04 01:05:53.269   668-690   WindowManager           system_server  V  info={id=65 t=CLOSE ... PaymentLauncherConfirmationActivity ...}
+2026-08-04 01:05:53.271 14333-14333 unknown:BridgelessReact com.telaboro.app  W  ReactHost{0}.onHostResume(activity)
+2026-08-04 01:05:53.271 14333-14333 unknown:BridgelessReact com.telaboro.app  W  ReactContext.onHostResume()
+
+# >>> КЛЮЧЕВАЯ СТРОКА: результат платежа (RESULT_OK) потерян <<<
+2026-08-04 01:05:53.563 14333-14333 ActivityResultRegistry  com.telaboro.app  W  Dropping pending result for request fragment_2563bee1-0533-4527-ad9d-1b48d92a118f_rq#0: ActivityResult{resultCode=RESULT_OK, data=Intent { xflg=0x4 (has extras) }}
+
+2026-08-04 01:05:53.588 14333-14333 WindowOnBackDispatcher  com.telaboro.app  D  setTopOnBackInvokedCallback (unwrapped): android.view.ViewRootImpl$$ExternalSyntheticLambda14@998b78f
+
+# Итог: Stripe вернул RESULT_OK (платёж успешен), но React Native не получил
+# данные PaymentIntent. Платёж остался в статусе Pending на бэкенде.
