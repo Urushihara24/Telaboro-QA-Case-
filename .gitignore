@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Конфиденциальные данные (не публиковать)
+secrets/
+*.env
+credentials.*
+
+# Скриншоты и видео исключены из репозитория
+# (конфиденциальность данных приложения)
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.webm
+*.mov
