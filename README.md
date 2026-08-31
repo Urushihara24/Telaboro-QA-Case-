@@ -1,5 +1,13 @@
 # Telaboro QA Case Study
 
+> End-to-end QA investigation of an Android marketplace and its web admin panel, covering API, PostgreSQL, Stripe, real-time flows and mobile diagnostics.
+
+| Scope | Test evidence | Outcome |
+|---|---|---|
+| Android app, admin panel, API and integrations | 150+ test cases, defect documentation and Logcat evidence | 55 findings in the first run, 18 new findings during retest and 3 release-blocking defects |
+
+**Start here:** [test documentation](docs/) · [technical logs](logs/) · [key findings](#-ключевые-находки)
+
 ## 📱 О проекте
 
 **Telaboro** — маркетплейс услуг для связи клиентов с мастерами (аналог TaskRabbit/Profi.ru для Латинской Америки). Платформа объединяет мобильное приложение (Android) и веб-админ-панель для управления операциями.
