@@ -1,176 +1,184 @@
 # Telaboro QA Case Study
 
-> End-to-end QA investigation of an Android marketplace and its web admin panel, covering API, PostgreSQL, Stripe, real-time flows and mobile diagnostics.
+> End-to-end QA investigation of an Android marketplace and its web admin panel, covering API, PostgreSQL, Stripe, real-time flows, and mobile diagnostics.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native">
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe">
+  <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase">
+</p>
 
 | Scope | Test evidence | Outcome |
 |---|---|---|
 | Android app, admin panel, API and integrations | 150+ test cases, defect documentation and Logcat evidence | 55 findings in the first run, 18 new findings during retest and 3 release-blocking defects |
 
-**Start here:** [test documentation](docs/) · [technical logs](logs/) · [key findings](#-ключевые-находки)
+**Start here:** [test documentation](docs/) · [technical logs](logs/) · [key findings](#-key-findings)
 
-## 📱 О проекте
+## 📱 About the project
 
-**Telaboro** — маркетплейс услуг для связи клиентов с мастерами (аналог TaskRabbit/Profi.ru для Латинской Америки). Платформа объединяет мобильное приложение (Android) и веб-админ-панель для управления операциями.
+**Telaboro** is a services marketplace connecting customers with technicians, similar to TaskRabbit/Profi.ru for Latin America. The platform combines an Android mobile application and a web admin panel for operational management.
 
-**Стек:**
-- **Mobile:** React Native + Expo (Android)
+**Technology stack:**
+- **Mobile:** React Native + Expo on Android
 - **Backend:** Node.js + Express + TypeScript
 - **Database:** PostgreSQL + PostGIS
-- **Payments:** Stripe Connect (Checkout, Payment Intents)
-- **Real-time:** SocketIO
+- **Payments:** Stripe Connect, Checkout, Payment Intents
+- **Real-time:** Socket.IO
 - **Push:** Firebase Cloud Messaging
-- **Admin Panel:** React + TypeScript (Web)
+- **Admin Panel:** React + TypeScript web application
 
 ---
 
-##  Моя роль
+## My role
 
-**QA Engineer** — полное тестирование мобильного приложения и админ-панели.
+**QA Engineer** — full testing of the mobile application and admin panel.
 
-**Объём работы:**
-- 150+ тест-кейсов, покрывающих все критичные бизнес-флоу
-- 55 багов в первом прогоне
-- 18 новых багов в ретесте
-- 3 критичных блокера, блокирующих релиз
-- Анализ Logcat, API responses, Stripe webhook integration
-
----
-
-## 🔍 Что тестировал
-
-### Mobile App (Android)
-- Онбординг и регистрация (клиент/мастер)
-- KYC верификация (5 шагов с фото и динамическим кодом)
-- Создание и управление задачами (In-person / Remote)
-- Система котировок и принятия предложений
-- Stripe платежи (Checkout, Connect, 3DS)
-- Real-time чат между клиентом и мастером (SocketIO)
-- Push-уведомления (FCM)
-- Управление профилем и удаление аккаунта
-
-### Admin Panel (Web)
-- Dashboard и сводные метрики
-- Аналитика (6 разделов: Conversion, Quotes, Technicians, Clients, Quality, Geography)
-- Управление пользователями и правами (RBAC)
-- Операции (платежи, споры, эскроу, выплаты, тикеты, геозоны)
-- Каталог услуг и стран
-- Система уровней амбассадоров и монетизации
-- Push/Email рассылки
-- Audit log и Crash Reports
-- Системные настройки
+**Scope of work:**
+- 150+ test cases covering critical business flows
+- 55 defects in the first run
+- 18 new defects during retest
+- 3 critical release blockers
+- Logcat analysis, API-response analysis, and Stripe webhook/integration investigation
 
 ---
 
-## 📊 Результаты
+## 🔍 What I tested
 
-### Первый прогон
-| Severity | Количество |
-|----------|------------|
+### Mobile App — Android
+- Onboarding and registration for customer/technician roles
+- KYC verification, five steps with photo and dynamic code
+- Task creation and management for in-person and remote jobs
+- Quote system and offer acceptance
+- Stripe payments through Checkout, Connect, and 3DS
+- Real-time customer↔technician chat through Socket.IO
+- FCM push notifications
+- Profile management and account deletion
+
+### Admin Panel — Web
+- Dashboard and summary metrics
+- Analytics across Conversion, Quotes, Technicians, Clients, Quality, and Geography
+- User and permission management with RBAC
+- Operations: payments, disputes, escrow, payouts, tickets, and geofences
+- Service and country catalogs
+- Ambassador level and monetization system
+- Push/email campaigns
+- Audit log and Crash Reports
+- System settings
+
+---
+
+## 📊 Results
+
+### First run
+| Severity | Count |
+|----------|------:|
 | 🔴 Critical | 7 |
 | 🟠 High | 9 |
 | 🟡 Medium | 22 |
 | 🔵 Low | 17 |
-| **Всего** | **55** |
+| **Total** | **55** |
 
-### Ретест (v2.1.0, чистая БД)
-- **Исправлено:** 8 багов из 55 (15%)
-- **Новых багов найдено:** 18
-- **Критичных:** 2 (Stripe payment stuck, profile crash)
-
----
-
-## 🚨 Ключевые находки
-
-### 1. Stripe Payment Launcher Bug (Critical)
-
-**Проблема:** Все платежи с картой зависают в статусе Pending.
-
-**Root cause:** React Native `ActivityResultRegistry` дропает результат нативного `PaymentLauncherConfirmationActivity`. Stripe возвращает `RESULT_OK`, но приложение не получает данные платежа.
-
-**Impact:** Клиенты не могут оплатить задачи → мастера не получают деньги → бизнес-процесс полностью заблокирован.
-
-**Evidence:** Logcat показывает `Dropping pending result: RESULT_OK` при возврате из нативного Stripe Activity.
-
-**Визуальное описание:** В админке Payments видно: Total charged: $0.00 MXN, Pending payments: 1 waiting. В таблице транзакций одна запись со статусом "Pending" (оранжевый бейдж), тип "Diagnosis" (фиолетовый бейдж), сумма $150.00.
+### Retest — v2.1.0, clean database
+- **Fixed:** 8 of 55 defects, 15%
+- **New defects found:** 18
+- **Critical:** 2, Stripe payment stuck and profile crash
 
 ---
 
-### 2. Profile Crash (Critical)
+## 🚨 Key findings
 
-**Проблема:** Краш публичного профиля мастера при открытии из котировки.
+### 1. Stripe Payment Launcher Bug — Critical
 
-**Root cause:** Компонент `TechnicianProfileScreen` обращается к свойству `country`, которого нет в ответе API.
+**Problem:** all card payments remain stuck in `Pending`.
 
-**Impact:** Клиенты не могут посмотреть профиль мастера перед принятием котировки — ключевой флоу принятия решения заблокирован.
+**Root cause evidence:** React Native `ActivityResultRegistry` drops the result from native `PaymentLauncherConfirmationActivity`. Stripe returns `RESULT_OK`, but the application does not receive the payment result.
 
-**Evidence:** Crash Reports в админке: 4 новых краша, все New. Logcat: `ReferenceError: Property 'country' doesn't exist at TechnicianProfileScreen`.
+**Impact:** customers cannot pay for tasks → technicians do not receive money → the core business flow is blocked.
 
-**Визуальное описание:** Чёрный экран с оранжевой иконкой взрыва 💥, заголовком "Something went wrong", текстом "Property 'country' doesn't exist" и оранжевой кнопкой "Retry". При нажатии Retry цикл повторяется.
+**Evidence:** Logcat contains `Dropping pending result: RESULT_OK` when returning from the native Stripe Activity.
 
----
-
-### 3. Payment Logic Bypass (Medium)
-
-**Проблема:** 11 заказов Per quote ($27.50) прошли без ввода карты.
-
-**Root cause:** Логика списания за котировки работает в обход Stripe. При уровне Bronce free allowance = 0, но платежи проходят автоматически.
-
-**Impact:** Потеря контроля над платежами, возможные финансовые потери.
-
-**Визуальное описание:** В админке Plan Orders: Total revenue $27.50 (11 paid orders), Per quote: 11. Таблица показывает 11 строк от одного мастера, каждая по $2.50, все со статусом "Paid" (зелёный).
+**Visual description:** Admin Payments shows Total charged: $0.00 MXN and one pending payment waiting. The transaction table contains a `Pending` item of type `Diagnosis` for $150.00.
 
 ---
 
-## 🛠 Инструменты
+### 2. Profile Crash — Critical
+
+**Problem:** opening a technician’s public profile from a quote crashes the screen.
+
+**Root cause evidence:** `TechnicianProfileScreen` references the property `country`, which is absent from the API response.
+
+**Impact:** customers cannot review a technician profile before accepting a quote, blocking a key decision-making flow.
+
+**Evidence:** admin Crash Reports show four new crashes. Logcat contains `ReferenceError: Property 'country' doesn't exist at TechnicianProfileScreen`.
+
+**Visual description:** black error screen with an explosion icon, “Something went wrong”, `Property 'country' doesn't exist`, and a “Retry” button. Retry reproduces the same loop.
+
+---
+
+### 3. Payment Logic Bypass — Medium
+
+**Problem:** 11 `Per quote` orders totaling $27.50 were completed without card input.
+
+**Root cause evidence:** quote charging operates outside the expected Stripe interaction. The Bronze level has zero free allowance, but charges are still marked paid automatically.
+
+**Impact:** loss of payment-control integrity and potential financial loss.
+
+**Visual description:** Admin Plan Orders shows Total revenue $27.50, 11 paid Per quote orders, all tied to one technician and each priced at $2.50.
+
+---
+
+## 🛠 Tools
 
 - **Test Management:** Markdown documentation
 - **Bug Tracking:** GitHub Issues
-- **Log Analysis:** Logcat (Android Studio), Chrome DevTools
-- **API Testing:** Browser DevTools, API responses analysis
-- **Devices:** Nothing Phone 1 (Android 15), Pixel 9a Emulator (Android 17)
+- **Log Analysis:** Logcat in Android Studio, Chrome DevTools
+- **API Testing:** Browser DevTools and API-response analysis
+- **Devices:** Nothing Phone 1 on Android 15, Pixel 9a Emulator on Android 17
 
 ---
 
-## 📈 Метрики качества
+## 📈 Quality metrics
 
-| Метрика | Значение |
-|---------|----------|
-| Test Coverage | 100% критичных флоу |
-| Bug Detection Rate | 73 бага за 2 прогона |
-| Critical Bugs Found | 9 (7 initial + 2 retest) |
+| Metric | Value |
+|--------|-------|
+| Test Coverage | 100% of critical flows |
+| Bug Detection Rate | 73 defects across two runs |
+| Critical Bugs Found | 9, seven initial + two retest |
 | False Positive Rate | <5% |
-| Retest Pass Rate | 15% (8/55 fixed) |
+| Retest Pass Rate | 15%, 8/55 fixed |
 
 ---
 
-## 💡 Lessons Learned
+## 💡 Lessons learned
 
-1. **Stripe интеграция** — всегда проверять webhook и ActivityResult handling в React Native + Native modules
-2. **React Native + Native modules** — частый источник багов при передаче данных между слоями
-3. **Чистая БД для ретеста** — необходима для проверки метрик без шума от seed-данных
-4. **i18n** — системная проблема, требует единого словаря переводов на всех слоях (UI, данные, легенды, фильтры)
-5. **RBAC** — наличие ролей в системе ≠ их фактическое использование; важно проверять назначение прав
+1. **Stripe integration** — verify both webhook behavior and ActivityResult handling when React Native interacts with native modules.
+2. **React Native + native modules** — cross-layer data transfer is a frequent defect boundary.
+3. **Clean database for retest** — necessary to validate metrics without noise from seeded data.
+4. **i18n** — a system-wide issue requires one consistent translation dictionary across UI, data, legends, and filters.
+5. **RBAC** — the presence of roles does not prove permissions are actually enforced; assignment and access must be tested explicitly.
 
 ---
 
-## 📂 Документация
+## 📂 Documentation
 
-- [Стратегия тестирования](docs/test-strategy.md)
-- [Баг-репорты ретеста (18 багов)](docs/bugs.md)
-- [Тест-кейсы ретеста (18 кейсов)](docs/test-cases.md)
-- [Итоги ретеста](docs/retest-summary.md)
-- [Окружение тестирования](docs/environment.md)
+- [Test strategy](docs/test-strategy.md)
+- [Retest bug reports — 18 defects](docs/bugs.md)
+- [Retest test cases — 18 cases](docs/test-cases.md)
+- [Retest summary](docs/retest-summary.md)
+- [Test environment](docs/environment.md)
 - [Logcat evidence](logs/)
 
 ---
 
-## 📞 Контакты
+## 📞 Contacts
 
-**Email:** [твой email]  
-**LinkedIn:** [твой LinkedIn]  
+**LinkedIn:** [Vsevolod Samoylov](https://www.linkedin.com/in/vsevolod-samoylov)  
 **Telegram:** @vsevolod
 
 ---
 
-*Проект выполнен в августе 2026*  
-*Примечание: Скриншоты и видео не включены в репозиторий из-за конфиденциальности данных приложения. Все баги содержат подробные текстовые описания UI и logcat evidence.*
+*Project completed in August 2026.*  
+*Screenshots and videos are not included because they contain confidential application data. Defects contain detailed textual UI descriptions and sanitized Logcat evidence instead.*
