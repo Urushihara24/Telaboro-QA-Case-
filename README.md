@@ -82,9 +82,9 @@
 | **Total** | **55** |
 
 ### Retest — v2.1.0, clean database
-- **Fixed:** 8 of 55 defects, 15%
+- **Confirmed fixed:** 8 of 55 first-run defects
 - **New defects found:** 18
-- **Critical:** 2, Stripe payment stuck and profile crash
+- **New critical findings:** 2, Stripe payment stuck and profile crash
 
 ---
 
@@ -94,7 +94,7 @@
 
 **Problem:** all card payments remain stuck in `Pending`.
 
-**Root cause evidence:** React Native `ActivityResultRegistry` drops the result from native `PaymentLauncherConfirmationActivity`. Stripe returns `RESULT_OK`, but the application does not receive the payment result.
+**Technical evidence:** React Native `ActivityResultRegistry` drops the result from native `PaymentLauncherConfirmationActivity`. Stripe returns `RESULT_OK`, but the application does not receive the payment result.
 
 **Impact:** customers cannot pay for tasks → technicians do not receive money → the core business flow is blocked.
 
@@ -108,7 +108,7 @@
 
 **Problem:** opening a technician’s public profile from a quote crashes the screen.
 
-**Root cause evidence:** `TechnicianProfileScreen` references the property `country`, which is absent from the API response.
+**Technical evidence:** `TechnicianProfileScreen` references the property `country`, which is absent from the API response.
 
 **Impact:** customers cannot review a technician profile before accepting a quote, blocking a key decision-making flow.
 
@@ -122,7 +122,7 @@
 
 **Problem:** 11 `Per quote` orders totaling $27.50 were completed without card input.
 
-**Root cause evidence:** quote charging operates outside the expected Stripe interaction. The Bronze level has zero free allowance, but charges are still marked paid automatically.
+**Technical evidence:** quote charging operates outside the expected Stripe interaction. The Bronze level has zero free allowance, but charges are still marked paid automatically.
 
 **Impact:** loss of payment-control integrity and potential financial loss.
 
@@ -140,15 +140,15 @@
 
 ---
 
-## 📈 Quality metrics
+## 📈 Execution snapshot
 
 | Metric | Value |
 |--------|-------|
-| Test Coverage | 100% of critical flows |
-| Bug Detection Rate | 73 defects across two runs |
-| Critical Bugs Found | 9, seven initial + two retest |
-| False Positive Rate | <5% |
-| Retest Pass Rate | 15%, 8/55 fixed |
+| Test cases | 150+ across critical product flows |
+| First-run findings | 55 |
+| New findings during retest | 18 |
+| Critical findings across both runs | 9, seven initial + two retest |
+| Confirmed fixed during retest | 8 of 55 first-run defects |
 
 ---
 
@@ -176,7 +176,7 @@
 ## 📞 Contacts
 
 **LinkedIn:** [Vsevolod Samoylov](https://www.linkedin.com/in/vsevolod-samoylov)  
-**Telegram:** @vsevolod
+**Telegram:** @urushihara24
 
 ---
 
