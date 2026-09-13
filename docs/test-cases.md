@@ -1,149 +1,149 @@
-# Тест-кейсы Telaboro (72 тест-кейса)
+# Telaboro Test Cases — 72 Cases
 
-Документ содержит две части:
-1. **Флоу-тестирование** (54 кейса) — позитивные и негативные сценарии по модулям
-2. **Негативные кейсы ретеста** (18 кейсов) — детальные сценарии найденных багов
+This document contains two parts:
+1. **Flow testing** — 54 positive and negative cases grouped by module.
+2. **Retest negative cases** — 18 detailed scenarios for defects found during retest.
 
-**Легенда статусов:**
-- ✅ Passed — работает корректно
-- ❌ Failed — найден баг (ссылка на баг-репорт)
-- ⛔ Blocked — нельзя проверить из-за блокера (платежи)
-
----
-
-## Часть 1. Флоу-тестирование
-
-### 📱 Mobile — Клиент (15 кейсов)
-
-| ID | Название | Тип | Приоритет | ОР (кратко) | Статус | Баг |
-|----|----------|-----|-----------|-------------|--------|-----|
-| TC-C-001 | Регистрация клиента по email | Positive | P1 | Аккаунт создан, переход на главный экран | ✅ Passed | — |
-| TC-C-002 | Логин клиента | Positive | P1 | Успешная авторизация | ✅ Passed | — |
-| TC-C-003 | Блокировка после неудачных попыток входа | Negative | P2 | Понятное сообщение о блокировке | ✅ Passed | NB-016 (два статуса в админке) |
-| TC-C-004 | Создание In-person задачи в активной геозоне | Positive | P1 | Задача создана, статус Published | ✅ Passed | — |
-| TC-C-005 | Создание задачи вне активной геозоны | Negative | P1 | Понятная ошибка на языке пользователя | ❌ Failed | M-C-005 (GEOFENCE_VIOLATION, сырой код) |
-| TC-C-006 | Валидация адреса (две склеенные локации) | Negative | P3 | Ошибка с подсказкой выбрать один адрес | ✅ Passed | — |
-| TC-C-007 | Создание Remote задачи | Positive | P2 | Задача создана без адреса | ✅ Passed | — |
-| TC-C-008 | Просмотр котировок в Quotes | Positive | P1 | Котировки видны в AWAITING RESPONSE | ✅ Passed | — |
-| TC-C-009 | Принятие котировки | Positive | P1 | Котировка переходит в PENDING PAYMENT | ✅ Passed | — |
-| TC-C-010 | Оплата через Stripe (карта 4242) | Positive | P1 | Платёж проходит, задача = Paid | ❌ Failed | NB-003 |
-| TC-C-011 | Повторная оплата после зависания | Negative | P2 | Кнопка блокируется или переиспользуется PaymentIntent | ❌ Failed | NB-004 |
-| TC-C-012 | Открытие профиля мастера из котировки | Positive | P1 | Профиль открывается с данными | ❌ Failed | NB-014 |
-| TC-C-013 | Чат с мастером в реальном времени | Positive | P2 | Сообщения доставляются мгновенно (SocketIO) | ✅ Passed | — |
-| TC-C-014 | Удаление аккаунта клиента | Positive | P2 | Аккаунт удалён, возврат на логин | ✅ Passed | — |
-| TC-C-015 | Оценка мастера после завершения задачи | Positive | P2 | Оценка сохраняется, рейтинг обновляется | ⛔ Blocked | Зависит от оплаты (NB-003) |
-
-### 📱 Mobile — Мастер (16 кейсов)
-
-| ID | Название | Тип | Приоритет | ОР (кратко) | Статус | Баг |
-|----|----------|-----|-----------|-------------|--------|-----|
-| TC-T-001 | Регистрация мастера | Positive | P1 | Аккаунт создан, переход к анкете | ✅ Passed | — |
-| TC-T-002 | Анкета мастера (категории, ставка, зона) | Positive | P1 | Анкета сохраняется | ✅ Passed | — |
-| TC-T-003 | KYC шаги 1–5 (фото ID, селфи, код) | Positive | P1 | KYC отправлен, статус Pending | ✅ Passed | — |
-| TC-T-004 | KYC шаг 5 — окно с кодом не сворачивается | Negative | P1 | Модалка стабильна при выборе медиа | ✅ Passed | Исправлено (M-C-001) |
-| TC-T-005 | Просмотр Inbox и задач | Positive | P1 | Задачи отображаются корректно | ✅ Passed | — |
-| TC-T-006 | Отправка котировки | Positive | P1 | Котировка отправлена, статус SENT | ✅ Passed | — |
-| TC-T-007 | Счётчик ACCEPTED после принятия котировки | Positive | P2 | Счётчик увеличивается на 1 | ⛔ Blocked | Требует успешной оплаты |
-| TC-T-008 | Confirm arrival + фото | Positive | P1 | Статус задачи = In Progress | ⛔ Blocked | Требует успешной оплаты |
-| TC-T-009 | Complete task | Positive | P1 | Задача завершена, запрос оценки | ⛔ Blocked | Требует успешной оплаты |
-| TC-T-010 | Покупка плана Balance (100 quotes) | Positive | P1 | Платёж проходит, баланс пополнен | ❌ Failed | NB-003 |
-| TC-T-011 | Покупка плана Subscription (30 quotes) | Positive | P2 | Платёж проходит, план активен | ❌ Failed | NB-003 |
-| TC-T-012 | Per quote списание при принятии котировки | Positive | P2 | Списание по правилам уровня (Bronce = 0 free) | ❌ Failed | NB-006 |
-| TC-T-013 | Валидация поля телефона | Negative | P3 | Маска/ошибка для некорректного ввода | ❌ Failed | NB-001 |
-| TC-T-014 | Удаление аккаунта мастера (полный флоу) | Positive | P2 | Аккаунт удалён, возврат на логин | ❌ Failed | M-C-007 |
-| TC-T-015 | Cancelled задачи в Inbox | Negative | P3 | Cancelled скрыты или визуально отделены | ❌ Failed | NB-007 |
-| TC-T-016 | Статусы задач после удаления клиента | Negative | P2 | Консистентный статус Cancelled везде | ❌ Failed | NB-005 |
-
-### 🖥 Admin Panel (18 кейсов)
-
-| ID | Название | Тип | Приоритет | ОР (кратко) | Статус | Баг |
-|----|----------|-----|-----------|-------------|--------|-----|
-| TC-A-001 | Логин админа | Positive | P1 | Успешная авторизация | ✅ Passed | — |
-| TC-A-002 | Dashboard метрики | Positive | P1 | Метрики соответствуют данным БД | ✅ Passed | — |
-| TC-A-003 | Revenue by plan / уровни амбассадоров | Positive | P2 | Разбивка по уровням корректна | ✅ Passed | Исправлено (A-M-015) |
-| TC-A-004 | Analytics → Conversion (воронка) | Positive | P2 | Конверсия ≤100% на всех этапах | ✅ Passed | Исправлено (M-M-004) |
-| TC-A-005 | Analytics → Quotes | Positive | P2 | Acceptance rate корректный | ✅ Passed | Исправлено (M-M-005) |
-| TC-A-006 | Analytics → Quality | Positive | P2 | "—" вместо 0.00 при отсутствии данных | ✅ Passed | Исправлено (M-M-007) |
-| TC-A-007 | Analytics → Ticket Reports (i18n) | Negative | P4 | Легенда на языке интерфейса (EN) | ❌ Failed | NB-015 |
-| TC-A-008 | Users: список и статусы | Positive | P2 | Один консистентный статус на пользователя | ❌ Failed | NB-016 |
-| TC-A-009 | Technicians: KYC статусы и уровни | Positive | P1 | Verified/Pending + уровень отображаются | ✅ Passed | Исправлено (M-H-008) |
-| TC-A-010 | Plan Orders | Positive | P2 | Заказы соответствуют реальным платежам | ❌ Failed | NB-006 |
-| TC-A-011 | Payments: обработка платежей | Positive | P1 | Успешные платежи = Paid, Total charged растёт | ❌ Failed | NB-003 |
-| TC-A-012 | Tasks: суммы и статусы | Positive | P2 | Суммы задач и платежей совпадают | ❌ Failed | NB-017 |
-| TC-A-013 | Escrow (i18n) | Negative | P4 | Подписи на языке интерфейса (EN) | ❌ Failed | NB-018 |
-| TC-A-014 | Admins: назначение ролей | Positive | P2 | Роли назначаются через Manage Roles | ✅ Passed | — |
-| TC-A-015 | Admins: отзыв ролей | Negative | P2 | Кнопка Revoke у каждой роли | ❌ Failed | NB-019 |
-| TC-A-016 | Crash Reports | Positive | P2 | Краши логируются с деталями | ✅ Passed | — |
-| TC-A-017 | Audit log | Positive | P3 | Действия админов и ошибки логируются | ✅ Passed | — |
-| TC-A-018 | Geofences | Positive | P2 | Список активных зон корректен | ✅ Passed | — |
-
-### 🔬 Логи и интеграции (5 кейсов)
-
-| ID | Название | Тип | Приоритет | ОР (кратко) | Статус | Баг |
-|----|----------|-----|-----------|-------------|--------|-----|
-| TC-L-001 | Logcat: CalledFromWrongThreadException | Negative | P2 | Нет ошибок потоков при навигации | ❌ Failed | NB-009 |
-| TC-L-002 | Logcat: RNScreens iOS-props | Negative | P4 | Нет предупреждений о недоступных props | ❌ Failed | NB-011 |
-| TC-L-003 | Logcat: Firebase Analytics | Negative | P4 | События логируются без ошибок | ❌ Failed | NB-012 |
-| TC-L-004 | Logcat: OnBackInvokedCallback | Negative | P4 | Предиктивный back gesture работает | ❌ Failed | NB-013 |
-| TC-L-005 | Logcat: Stripe card brand tint | Negative | P3 | Иконка бренда отображается корректно | ❌ Failed | NB-010 |
-
-**Итого по части 1:** 54 кейса (✅ Passed: 26, ❌ Failed: 21, ⛔ Blocked: 7)
+**Status legend:**
+- ✅ Passed — works as expected
+- ❌ Failed — defect found, linked to a bug report
+- ⛔ Blocked — cannot be completed because of a blocker, primarily payments
 
 ---
 
-## Часть 2. Негативные кейсы ретеста (детальные)
+## Part 1. Flow Testing
 
-### Critical (2)
+### 📱 Mobile — Customer — 15 cases
 
-| ID | Название | Приоритет | Предусловия | Шаги | ОР | Окружение | Статус | Баг |
-|----|----------|-----------|-------------|------|-----|-----------|--------|-----|
-| TC-NB-003 | Оплата через Stripe Checkout | Critical | 1. Аккаунт клиента создан<br>2. Задача создана и котировка принята<br>3. Статус задачи: PENDING PAYMENT<br>4. Доступна тестовая карта 4242 08/27 253 | 1. Залогиниться под клиентом<br>2. Перейти в Quotes<br>3. Нажать Complete payment<br>4. Ввести карту: 4242 08/27 253<br>5. Нажать Pay<br>6. Пройти 3DS/biometric confirmation<br>7. Вернуться в приложение<br>8. Проверить статус задачи<br>9. Открыть админку → Payments → проверить Total charged | Платёж обработан, статус задачи = Paid/Assigned. В админке Total charged увеличивается на сумму платежа. | Android устройство (Nothing Phone 1, Android 15)<br>Приложение Telaboro v2.1.0 | Failed | NB-003 |
-| TC-NB-014 | Открытие публичного профиля мастера | Critical | 1. Аккаунт клиента создан<br>2. Мастер отправил котировку<br>3. Клиент находится на экране Quotes | 1. Залогиниться под клиентом<br>2. Перейти в Quotes<br>3. Нажать на имя мастера<br>4. Проверить загрузку профиля<br>5. Проверить Logcat на ошибки | Открывается публичный профиль мастера с данными: имя, рейтинг, категории, локация. Ошибок в консоли нет. | Android устройство + эмулятор<br>Приложение Telaboro v2.1.0 | Failed | NB-014 |
+| ID | Title | Type | Priority | Expected result — short | Status | Bug |
+|----|-------|------|----------|-------------------------|--------|-----|
+| TC-C-001 | Customer registration by email | Positive | P1 | Account created and home screen opened | ✅ Passed | — |
+| TC-C-002 | Customer login | Positive | P1 | Successful authentication | ✅ Passed | — |
+| TC-C-003 | Lockout after failed login attempts | Negative | P2 | Clear lockout message | ✅ Passed | NB-016, two statuses in admin |
+| TC-C-004 | Create In-person task inside active geofence | Positive | P1 | Task created with Published status | ✅ Passed | — |
+| TC-C-005 | Create task outside active geofence | Negative | P1 | Clear localized error | ❌ Failed | M-C-005, raw `GEOFENCE_VIOLATION` code |
+| TC-C-006 | Address validation with two concatenated locations | Negative | P3 | Error guides user to select one address | ✅ Passed | — |
+| TC-C-007 | Create Remote task | Positive | P2 | Task created without address | ✅ Passed | — |
+| TC-C-008 | View quotes | Positive | P1 | Quotes visible in AWAITING RESPONSE | ✅ Passed | — |
+| TC-C-009 | Accept quote | Positive | P1 | Quote moves to PENDING PAYMENT | ✅ Passed | — |
+| TC-C-010 | Stripe payment with test card | Positive | P1 | Payment completes and task becomes Paid | ❌ Failed | NB-003 |
+| TC-C-011 | Retry payment after stuck attempt | Negative | P2 | Button disabled or existing PaymentIntent reused | ❌ Failed | NB-004 |
+| TC-C-012 | Open technician profile from quote | Positive | P1 | Profile opens with technician data | ❌ Failed | NB-014 |
+| TC-C-013 | Real-time chat with technician | Positive | P2 | Messages delivered immediately through Socket.IO | ✅ Passed | — |
+| TC-C-014 | Delete customer account | Positive | P2 | Account deleted and user returned to login | ✅ Passed | — |
+| TC-C-015 | Rate technician after task completion | Positive | P2 | Rating saved and technician score updated | ⛔ Blocked | Depends on payment, NB-003 |
 
-### High (5)
+### 📱 Mobile — Technician — 16 cases
 
-| ID | Название | Приоритет | Предусловия | Шаги | ОР | Окружение | Статус | Баг |
-|----|----------|-----------|-------------|------|-----|-----------|--------|-----|
-| TC-NB-002 | Проверка is_first_purchase | High | 1. Мастер verified<br>2. Уже были покупки планов<br>3. Предыдущие платежи Pending | 1. Залогиниться под техником<br>2. Купить план Balance<br>3. Ввести карту<br>4. Дождаться Pending<br>5. Купить ещё один план<br>6. Проверить is_first_purchase в API | is_first_purchase: false для повторных покупок | Эмулятор (Pixel 9a, Android 17)<br>Telaboro v2.1.0 | Failed | NB-002 |
-| TC-NB-004 | Повторная попытка оплаты | High | 1. Котировка принята<br>2. Статус: PENDING PAYMENT<br>3. Первая попытка зависла | 1. Нажать Complete payment → Pay<br>2. Дождаться Pending<br>3. Снова Complete payment → другая карта → Pay | Кнопка disabled после первой попытки ИЛИ переиспользование PaymentIntent | Nothing Phone 1 (Android 15)<br>Telaboro v2.1.0 | Failed | NB-004 |
-| TC-NB-005 | Статусы после удаления клиента | High | 1. Клиент и техник созданы<br>2. Котировка принята (Accepted)<br>3. Клиент удалил аккаунт | 1. Зайти под техником<br>2. Inbox → статус задачи<br>3. Quotes → статус задачи<br>4. Клик в Quotes → детали<br>5. Счётчик Accepted | Статус консистентен везде (Cancelled). Счётчик уменьшается. | Устройство + эмулятор<br>Telaboro v2.1.0 | Failed | NB-005 |
-| TC-NB-009 | Навигация между экранами | High | 1. Приложение запущено<br>2. Пользователь залогинен | 1. Открыть приложение<br>2. Quotes → имя мастера<br>3. Назад → Profile<br>4. Проверить Logcat | Нет CalledFromWrongThreadException | Устройство + эмулятор<br>Telaboro v2.1.0 | Failed | NB-009 |
-| TC-NB-019 | Отзыв роли у админа | High | 1. Админ Super Admin<br>2. Есть админ с несколькими ролями | 1. System → Admins<br>2. Иконка щита в Actions<br>3. В Manage Roles искать кнопку удаления роли | Кнопка 'Revoke' у каждой роли | Chrome, EN интерфейс | Failed | NB-019 |
+| ID | Title | Type | Priority | Expected result — short | Status | Bug |
+|----|-------|------|----------|-------------------------|--------|-----|
+| TC-T-001 | Technician registration | Positive | P1 | Account created and questionnaire opened | ✅ Passed | — |
+| TC-T-002 | Technician questionnaire: categories, rate, area | Positive | P1 | Questionnaire saved | ✅ Passed | — |
+| TC-T-003 | KYC steps 1–5: ID photo, selfie, code | Positive | P1 | KYC submitted with Pending status | ✅ Passed | — |
+| TC-T-004 | KYC step 5 code modal remains stable | Negative | P1 | Modal remains open while media is selected | ✅ Passed | Fixed M-C-001 |
+| TC-T-005 | View Inbox and tasks | Positive | P1 | Tasks display correctly | ✅ Passed | — |
+| TC-T-006 | Send quote | Positive | P1 | Quote submitted with SENT status | ✅ Passed | — |
+| TC-T-007 | ACCEPTED counter after quote acceptance | Positive | P2 | Counter increases by one | ⛔ Blocked | Requires successful payment |
+| TC-T-008 | Confirm arrival + photo | Positive | P1 | Task becomes In Progress | ⛔ Blocked | Requires successful payment |
+| TC-T-009 | Complete task | Positive | P1 | Task completes and rating request appears | ⛔ Blocked | Requires successful payment |
+| TC-T-010 | Buy Balance plan, 100 quotes | Positive | P1 | Payment completes and balance increases | ❌ Failed | NB-003 |
+| TC-T-011 | Buy Subscription plan, 30 quotes | Positive | P2 | Payment completes and plan becomes active | ❌ Failed | NB-003 |
+| TC-T-012 | Per quote charge after quote acceptance | Positive | P2 | Charge follows level rules, Bronce has 0 free | ❌ Failed | NB-006 |
+| TC-T-013 | Phone field validation | Negative | P3 | Mask/error for invalid input | ❌ Failed | NB-001 |
+| TC-T-014 | Delete technician account — full flow | Positive | P2 | Account deleted and user returned to login | ❌ Failed | M-C-007 |
+| TC-T-015 | Cancelled tasks in Inbox | Negative | P3 | Cancelled tasks hidden or visually separated | ❌ Failed | NB-007 |
+| TC-T-016 | Task status after customer deletion | Negative | P2 | Consistent Cancelled state everywhere | ❌ Failed | NB-005 |
 
-### Medium (6)
+### 🖥 Admin Panel — 18 cases
 
-| ID | Название | Приоритет | Предусловия | Шаги | ОР | Окружение | Статус | Баг |
-|----|----------|-----------|-------------|------|-----|-----------|--------|-----|
-| TC-NB-001 | Валидация поля телефона | Medium | Открыт экран регистрации/профиля | 1. Ввести 123qwere123132412<br>2. Сохранить профиль | Ошибка валидации или маска | Nothing Phone 1 (Android 15)<br>Telaboro v2.1.0 | Failed | NB-001 |
-| TC-NB-006 | Оплата Per quote при Bronce | Medium | Мастер Bronce (0 free quotes) | 1. Клиент принимает котировку<br>2. Админка → Plan Orders<br>3. Посчитать заказы и сумму<br>4. Проверить ввод карты | Списание через Stripe или по free allowance | Chrome, EN интерфейс | Failed | NB-006 |
-| TC-NB-007 | Cancelled задачи в Inbox | Medium | Задача перешла в Cancelled | 1. Inbox → найти Cancelled<br>2. Попытаться откликнуться<br>3. Проверить визуальное отличие | Cancelled скрыты или отделены визуально | Эмулятор (Pixel 9a, Android 17)<br>Telaboro v2.1.0 | Failed | NB-007 |
-| TC-NB-010 | Иконка бренда карты | Medium | Открыт Checkout | 1. Ввести 4242<br>2. Проверить иконку Visa<br>3. Проверить Logcat | Иконка с корректным цветом, без ошибок | Nothing Phone 1 (Android 15)<br>Telaboro v2.1.0 | Failed | NB-010 |
-| TC-NB-016 | Статусы заблокированного пользователя | Medium | Клиент заблокирован | 1. Users → найти пользователя<br>2. Проверить колонку Status | Один статус: Active ИЛИ Blocked | Chrome, EN интерфейс | Failed | NB-016 |
-| TC-NB-017 | Сравнение сумм задачи и платежа | Medium | Задача $123 + платёж Diagnosis | 1. Tasks → сумма задачи<br>2. Payments → сумма платежа<br>3. Сравнить | Суммы совпадают | Chrome, EN интерфейс | Failed | NB-017 |
+| ID | Title | Type | Priority | Expected result — short | Status | Bug |
+|----|-------|------|----------|-------------------------|--------|-----|
+| TC-A-001 | Admin login | Positive | P1 | Successful authentication | ✅ Passed | — |
+| TC-A-002 | Dashboard metrics | Positive | P1 | Metrics match database data | ✅ Passed | — |
+| TC-A-003 | Revenue by plan / ambassador levels | Positive | P2 | Breakdown by level is correct | ✅ Passed | Fixed A-M-015 |
+| TC-A-004 | Analytics → Conversion funnel | Positive | P2 | Conversion ≤100% at every stage | ✅ Passed | Fixed M-M-004 |
+| TC-A-005 | Analytics → Quotes | Positive | P2 | Acceptance rate is correct | ✅ Passed | Fixed M-M-005 |
+| TC-A-006 | Analytics → Quality | Positive | P2 | `—` instead of 0.00 when data is absent | ✅ Passed | Fixed M-M-007 |
+| TC-A-007 | Analytics → Ticket Reports i18n | Negative | P4 | Chart legend matches EN interface | ❌ Failed | NB-015 |
+| TC-A-008 | Users list and statuses | Positive | P2 | One consistent status per user | ❌ Failed | NB-016 |
+| TC-A-009 | Technician KYC statuses and levels | Positive | P1 | Verified/Pending + level displayed | ✅ Passed | Fixed M-H-008 |
+| TC-A-010 | Plan Orders | Positive | P2 | Orders correspond to actual payment behavior | ❌ Failed | NB-006 |
+| TC-A-011 | Payments processing | Positive | P1 | Successful payments become Paid and Total charged grows | ❌ Failed | NB-003 |
+| TC-A-012 | Task amounts and statuses | Positive | P2 | Task and payment amounts match | ❌ Failed | NB-017 |
+| TC-A-013 | Escrow i18n | Negative | P4 | Labels match EN interface | ❌ Failed | NB-018 |
+| TC-A-014 | Admin role assignment | Positive | P2 | Roles assigned through Manage Roles | ✅ Passed | — |
+| TC-A-015 | Admin role revocation | Negative | P2 | Revoke control available for each role | ❌ Failed | NB-019 |
+| TC-A-016 | Crash Reports | Positive | P2 | Crashes recorded with details | ✅ Passed | — |
+| TC-A-017 | Audit log | Positive | P3 | Admin actions and errors are logged | ✅ Passed | — |
+| TC-A-018 | Geofences | Positive | P2 | Active-zone list is correct | ✅ Passed | — |
 
-### Low (5)
+### 🔬 Logs and integrations — 5 cases
 
-| ID | Название | Приоритет | Предусловия | Шаги | ОР | Окружение | Статус | Баг |
-|----|----------|-----------|-------------|------|-----|-----------|--------|-----|
-| TC-NB-011 | Logcat: iOS-props RNScreens | Low | Приложение на Android | 1. Перейти между экранами<br>2. Проверить Logcat | Нет предупреждений о props | Устройство + эмулятор<br>Telaboro v2.1.0 | Failed | NB-011 |
-| TC-NB-012 | Firebase Analytics | Low | FCM настроен | 1. Дождаться push<br>2. Проверить Logcat | Нет 'analytics library is missing' | Устройство + эмулятор<br>Telaboro v2.1.0 | Failed | NB-012 |
-| TC-NB-013 | OnBackInvokedCallback | Low | Android 13+ | 1. Gesture назад<br>2. Проверить Logcat | Нет предупреждений | Устройство + эмулятор<br>Telaboro v2.1.0 | Failed | NB-013 |
-| TC-NB-015 | Легенда в Ticket Reports | Low | Интерфейс EN | 1. Analytics → Ticket Reports<br>2. Проверить легенду графика | Created / Resolved (EN) | Chrome, EN интерфейс | Failed | NB-015 |
-| TC-NB-018 | Подпись в Escrow | Low | Интерфейс EN | 1. Operations → Escrow<br>2. Проверить подпись 'In escrow' | 0 transactions (EN) | Chrome, EN интерфейс | Failed | NB-018 |
+| ID | Title | Type | Priority | Expected result — short | Status | Bug |
+|----|-------|------|----------|-------------------------|--------|-----|
+| TC-L-001 | Logcat: CalledFromWrongThreadException | Negative | P2 | No thread errors during navigation | ❌ Failed | NB-009 |
+| TC-L-002 | Logcat: RNScreens iOS props | Negative | P4 | No warnings about unsupported props | ❌ Failed | NB-011 |
+| TC-L-003 | Logcat: Firebase Analytics | Negative | P4 | Events log without errors | ❌ Failed | NB-012 |
+| TC-L-004 | Logcat: OnBackInvokedCallback | Negative | P4 | Predictive back gesture works correctly | ❌ Failed | NB-013 |
+| TC-L-005 | Logcat: Stripe card-brand tint | Negative | P3 | Brand icon renders correctly | ❌ Failed | NB-010 |
 
-**Итого по части 2:** 18 кейсов (все Failed — это найденные баги)
+**Part 1 total:** 54 cases — ✅ Passed: 26, ❌ Failed: 21, ⛔ Blocked: 7.
 
 ---
 
-## 📊 Сводное покрытие
+## Part 2. Detailed Negative Retest Cases
 
-| Модуль | Кейсов | Passed | Failed | Blocked |
-|--------|--------|--------|--------|---------|
-| Mobile — Клиент | 15 | 9 | 4 | 2 |
-| Mobile — Мастер | 16 | 6 | 7 | 3 |
+### Critical — 2
+
+| ID | Title | Priority | Preconditions | Steps | Expected result | Environment | Status | Bug |
+|----|-------|----------|---------------|-------|-----------------|-------------|--------|-----|
+| TC-NB-003 | Stripe Checkout payment | Critical | 1. Customer exists<br>2. Task exists and quote accepted<br>3. Task status PENDING PAYMENT<br>4. Stripe test card available | 1. Login as customer<br>2. Open Quotes<br>3. Select Complete payment<br>4. Enter Stripe test card<br>5. Tap Pay<br>6. Complete 3DS/biometric confirmation<br>7. Return to app<br>8. Check task status<br>9. Open Admin → Payments and check Total charged | Payment completes; task becomes Paid/Assigned; Total charged increases by payment amount | Nothing Phone 1, Android 15<br>Telaboro v2.1.0 | Failed | NB-003 |
+| TC-NB-014 | Open technician public profile | Critical | 1. Customer exists<br>2. Technician sent quote<br>3. Customer is on Quotes screen | 1. Login as customer<br>2. Open Quotes<br>3. Tap technician name<br>4. Check profile load<br>5. Check Logcat | Public profile opens with name, rating, categories, and location; no runtime error | Physical device + emulator<br>Telaboro v2.1.0 | Failed | NB-014 |
+
+### High — 5
+
+| ID | Title | Priority | Preconditions | Steps | Expected result | Environment | Status | Bug |
+|----|-------|----------|---------------|-------|-----------------|-------------|--------|-----|
+| TC-NB-002 | Verify `is_first_purchase` | High | 1. Technician verified<br>2. Previous plan purchases exist<br>3. Previous payments Pending | 1. Login as technician<br>2. Buy Balance plan<br>3. Enter card<br>4. Wait for Pending<br>5. Buy another plan<br>6. Inspect `is_first_purchase` in API response | `is_first_purchase: false` for repeat purchases | Pixel 9a emulator, Android 17<br>Telaboro v2.1.0 | Failed | NB-002 |
+| TC-NB-004 | Retry a stuck payment | High | 1. Quote accepted<br>2. Status PENDING PAYMENT<br>3. First attempt stuck | 1. Complete payment → Pay<br>2. Wait for Pending<br>3. Run Complete payment again with another card | Button becomes disabled after first attempt or existing PaymentIntent is reused | Nothing Phone 1, Android 15<br>Telaboro v2.1.0 | Failed | NB-004 |
+| TC-NB-005 | Statuses after customer deletion | High | 1. Customer and technician exist<br>2. Quote Accepted<br>3. Customer deleted account | 1. Login as technician<br>2. Check task status in Inbox<br>3. Check status in Quotes<br>4. Open quote details<br>5. Check Accepted counter | Cancelled status is consistent everywhere and Accepted counter decreases | Device + emulator<br>Telaboro v2.1.0 | Failed | NB-005 |
+| TC-NB-009 | Navigation between screens | High | App is running and user is logged in | 1. Open app<br>2. Quotes → technician name<br>3. Back → Profile<br>4. Inspect Logcat | No `CalledFromWrongThreadException` | Device + emulator<br>Telaboro v2.1.0 | Failed | NB-009 |
+| TC-NB-019 | Revoke admin role | High | Super Admin exists and another admin has multiple roles | 1. System → Admins<br>2. Open shield action<br>3. Inspect Manage Roles for removal control | Revoke action available for each role | Chrome, EN interface | Failed | NB-019 |
+
+### Medium — 6
+
+| ID | Title | Priority | Preconditions | Steps | Expected result | Environment | Status | Bug |
+|----|-------|----------|---------------|-------|-----------------|-------------|--------|-----|
+| TC-NB-001 | Phone field validation | Medium | Registration/profile screen open | Enter `123qwere123132412` and save profile | Validation error or input mask | Nothing Phone 1, Android 15<br>Telaboro v2.1.0 | Failed | NB-001 |
+| TC-NB-006 | Per quote payment at Bronce level | Medium | Technician is Bronce with 0 free quotes | 1. Customer accepts quote<br>2. Admin → Plan Orders<br>3. Count orders and amount<br>4. Check whether card input occurred | Charge follows Stripe/free-allowance rules | Chrome, EN interface | Failed | NB-006 |
+| TC-NB-007 | Cancelled tasks in Inbox | Medium | Task became Cancelled | Find Cancelled task, attempt to respond, inspect visual separation | Cancelled items hidden or visually separated | Pixel 9a emulator, Android 17<br>Telaboro v2.1.0 | Failed | NB-007 |
+| TC-NB-010 | Card-brand icon | Medium | Checkout open | Enter `4242`, inspect Visa icon, inspect Logcat | Correct brand icon without errors | Nothing Phone 1, Android 15<br>Telaboro v2.1.0 | Failed | NB-010 |
+| TC-NB-016 | Blocked-user status | Medium | Customer is blocked | Users → find user → inspect Status column | One status only: Active OR Blocked | Chrome, EN interface | Failed | NB-016 |
+| TC-NB-017 | Compare task and payment amounts | Medium | Task $123 + Diagnosis payment | Compare Tasks amount and Payments amount | Amounts match | Chrome, EN interface | Failed | NB-017 |
+
+### Low — 5
+
+| ID | Title | Priority | Preconditions | Steps | Expected result | Environment | Status | Bug |
+|----|-------|----------|---------------|-------|-----------------|-------------|--------|-----|
+| TC-NB-011 | Logcat: RNScreens iOS props | Low | Android app | Navigate between screens and inspect Logcat | No unsupported-prop warnings | Device + emulator<br>Telaboro v2.1.0 | Failed | NB-011 |
+| TC-NB-012 | Firebase Analytics | Low | FCM configured | Wait for push and inspect Logcat | No `analytics library is missing` error | Device + emulator<br>Telaboro v2.1.0 | Failed | NB-012 |
+| TC-NB-013 | OnBackInvokedCallback | Low | Android 13+ | Use back gesture and inspect Logcat | No warnings | Device + emulator<br>Telaboro v2.1.0 | Failed | NB-013 |
+| TC-NB-015 | Ticket Reports legend | Low | EN interface | Analytics → Ticket Reports → inspect chart legend | Created / Resolved in English | Chrome, EN interface | Failed | NB-015 |
+| TC-NB-018 | Escrow label | Low | EN interface | Operations → Escrow → inspect “In escrow” subtitle | `0 transactions` in English | Chrome, EN interface | Failed | NB-018 |
+
+**Part 2 total:** 18 cases, all Failed because each represents a confirmed retest defect.
+
+---
+
+## 📊 Coverage Summary
+
+| Module | Cases | Passed | Failed | Blocked |
+|--------|------:|-------:|-------:|--------:|
+| Mobile — Customer | 15 | 9 | 4 | 2 |
+| Mobile — Technician | 16 | 6 | 7 | 3 |
 | Admin Panel | 18 | 11 | 7 | 0 |
-| Логи и интеграции | 5 | 0 | 5 | 0 |
-| Детальные негативные | 18 | 0 | 18 | 0 |
-| **Всего** | **72** | **26** | **41** | **5** |
+| Logs and integrations | 5 | 0 | 5 | 0 |
+| Detailed negative cases | 18 | 0 | 18 | 0 |
+| **Total** | **72** | **26** | **41** | **5** |
 
-**Вывод:** Основные позитивные флоу работают (регистрация, KYC, задачи, котировки, чат). Блокеры сосредоточены в платежах (Stripe) и согласованности данных — это и есть причина, по которой продукт не готов к релизу.
+**Conclusion:** core positive flows such as registration, KYC, task creation, quotes, and chat work. Release blockers are concentrated in Stripe payments and data consistency, which is why the product is not ready for release.
