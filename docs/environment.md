@@ -1,58 +1,58 @@
-# Окружение тестирования
+# Test Environment
 
-## 📱 Мобильное приложение
+## 📱 Mobile application
 
-| Параметр | Значение |
+| Parameter | Value |
 |----------|----------|
-| Физическое устройство | Nothing Phone 1, Android 15 |
-| Эмулятор | Google Pixel 9a, Android 17 |
-| Версия приложения | Telaboro v2.1.0 |
-| Стек | React Native + Expo |
-| Платежи | Stripe (Test Mode) |
-| Real-time | SocketIO |
+| Physical device | Nothing Phone 1, Android 15 |
+| Emulator | Google Pixel 9a, Android 17 |
+| Application version | Telaboro v2.1.0 |
+| Stack | React Native + Expo |
+| Payments | Stripe Test Mode |
+| Real-time | Socket.IO |
 | Push | Firebase Cloud Messaging |
-| Хранилище медиа | AWS S3 (presigned URLs) |
+| Media storage | AWS S3 with presigned URLs |
 
-## 🖥 Админ-панель
+## 🖥 Admin panel
 
-| Параметр | Значение |
+| Parameter | Value |
 |----------|----------|
-| Браузер | Google Chrome (автоперевод отключён) |
-| Интерфейс | EN |
-| Стек | React + TypeScript |
-| Бэкенд | NodeJS + Express + TypeScript |
-| База данных | PostgreSQL + PostGIS |
+| Browser | Google Chrome, automatic translation disabled |
+| Interface | EN |
+| Stack | React + TypeScript |
+| Backend | Node.js + Express + TypeScript |
+| Database | PostgreSQL + PostGIS |
 
-## 🧪 Тестовые данные
+## 🧪 Test data
 
-Для ретеста использовалась **чистая БД** без seed-данных. Тестовые аккаунты создавались вручную:
+The retest used a **clean database** without seed data. Test accounts were created manually:
 
-| Роль | Описание |
-|------|----------|
-| Клиент | Создан через регистрацию в приложении (одноразовый email) |
-| Мастер | Создан через регистрацию, прошёл KYC (verified) |
-| Мастер 2 | Создан через регистрацию, KYC pending |
-| Админ | Существующий аккаунт с ролью Super Admin |
+| Role | Description |
+|------|-------------|
+| Customer | Created through application registration using a disposable email |
+| Technician | Created through registration and completed KYC as verified |
+| Technician 2 | Created through registration with KYC pending |
+| Admin | Existing account with Super Admin role |
 
-**Контрольные транзакции для проверки метрик:**
-- 3 задачи (1 Assigned, 2 Cancelled после удаления клиента)
-- 3 котировки (1 Accepted)
-- 3 покупки планов (2 Balance, 1 Subscription) — все зависли в Pending
-- 11 списаний Per quote по $2.50 (автоматические, без карты)
-- 1 платёж Diagnosis $150.00 (Pending)
+**Control transactions used for metric verification:**
+- 3 tasks: 1 Assigned, 2 Cancelled after customer deletion
+- 3 quotes: 1 Accepted
+- 3 plan purchases: 2 Balance, 1 Subscription — all stuck in Pending
+- 11 Per quote charges at $2.50, created automatically without card input
+- 1 Diagnosis payment of $150.00, Pending
 
-## 🛠 Инструменты
+## 🛠 Tools
 
-| Инструмент | Назначение |
-|------------|------------|
-| Logcat (Android Studio) | Анализ крашей и ошибок нативного слоя |
-| Chrome DevTools | Анализ API responses, сетевых запросов |
+| Tool | Purpose |
+|------|---------|
+| Logcat in Android Studio | Native-layer crash and error analysis |
+| Chrome DevTools | API response and network request analysis |
 | GitHub Issues | Bug tracking |
-| Markdown | Документация (баг-репорты, тест-кейсы) |
+| Markdown | Bug reports and test-case documentation |
 
-## 🔑 Методы анализа
+## 🔑 Analysis methods
 
-1. **Logcat-анализ** — поиск крашей (ReferenceError, CalledFromWrongThreadException), предупреждений SDK (Stripe, Firebase, RNScreens)
-2. **API-анализ** — проверка полей ответов (is_first_purchase, country, статусы)
-3. **Сверка метрик** — сравнение контрольных значений (рассчитанных вручную) с данными админки
-4. **Кросс-ролевая проверка** — один сценарий проверяется с трёх ролей (клиент, мастер, админ) для выявления рассинхронов
+1. **Logcat analysis** — crashes such as `ReferenceError` and `CalledFromWrongThreadException`, plus SDK warnings from Stripe, Firebase, and RNScreens.
+2. **API analysis** — response fields such as `is_first_purchase`, `country`, and status values.
+3. **Metric reconciliation** — compare manually calculated control values with admin-panel metrics.
+4. **Cross-role validation** — execute one scenario from customer, technician, and admin perspectives to expose synchronization issues.
