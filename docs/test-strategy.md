@@ -1,77 +1,77 @@
-# Стратегия тестирования Telaboro
+# Telaboro Test Strategy
 
-## Цели тестирования
+## Test objectives
 
-1. Проверить функциональность мобильного приложения для клиентов и мастеров
-2. Протестировать админ-панель и все её разделы
-3. Проверить взаимодействие между ролями в реальном времени
-4. Выявить критичные блокеры и дефекты безопасности
-5. Оценить готовность продукта к релизу
+1. Validate mobile application functionality for customers and technicians.
+2. Test the admin panel and all of its sections.
+3. Verify real-time interaction between roles.
+4. Identify critical blockers and security-related defects.
+5. Assess product readiness for release.
 
-## Область тестирования
+## Test scope
 
-### В scope:
-- **Мобильное приложение Android (мастер):** онбординг, KYC (5 шагов), inbox, котировки, чат, профиль, удаление аккаунта
-- **Мобильное приложение Android (клиент):** онбординг, создание задач (In-person/Remote), requests, quotes, оплата (Stripe), чат
-- **Админ-панель:** Dashboard, Аналитика (6 разделов), Пользователи, Операции (8 разделов), Справочники (4 раздела), Система (8 разделов)
-- **Интеграции:** Stripe (Checkout, Connect), SocketIO real-time чат, Firebase Cloud Messaging
-- **Геозоны:** PostGIS валидация локаций
-- **KYC:** Верификация мастеров с фото и динамическим кодом
+### In scope
+- **Android mobile app — technician:** onboarding, five-step KYC, inbox, quotes, chat, profile, account deletion.
+- **Android mobile app — customer:** onboarding, in-person/remote task creation, requests, quotes, Stripe payments, chat.
+- **Admin panel:** Dashboard; six Analytics sections; Users; eight Operations sections; four reference/catalog sections; eight System sections.
+- **Integrations:** Stripe Checkout/Connect, Socket.IO real-time chat, Firebase Cloud Messaging.
+- **Geofencing:** PostGIS location validation.
+- **KYC:** technician verification with photo and dynamic code.
 
-### Вне scope:
-- iOS приложение
-- Web-приложение для клиентов/мастеров
-- Нагрузочное тестирование
-- Тестирование безопасности (pentest)
-- Тестирование API (только через UI)
+### Out of scope
+- iOS application.
+- Web application for customers/technicians.
+- Load testing.
+- Security penetration testing.
+- Standalone API testing; API behavior was observed through UI-driven flows and DevTools.
 
-## Типы тестирования
+## Testing types
 
-- **Функциональное тестирование** — проверка бизнес-логики и пользовательских сценариев
-- **Тестирование пользовательского интерфейса** — визуальные дефекты, UX
-- **Тестирование локализации (i18n)** — проверка переводов и смешения языков
-- **Тестирование интеграций** — Stripe, SocketIO, FCM, PostGIS
-- **Smoke-тестирование** — критичные флоу перед релизом
-- **Тестирование прав доступа (RBAC)** — роли админов, permissions
+- **Functional testing** — business logic and user scenarios.
+- **UI testing** — visual defects and UX.
+- **Localization testing — i18n** — translations and mixed-language states.
+- **Integration testing** — Stripe, Socket.IO, FCM, PostGIS.
+- **Smoke testing** — critical flows before release.
+- **Access-control testing — RBAC** — admin roles and permissions.
 
-## Методология
+## Methodology
 
-Тестирование проводилось **вручную** с использованием реальных устройств и эмуляторов.
+Testing was performed **manually** using physical devices and emulators.
 
-**Процесс:**
-1. Создание тестовых аккаунтов (клиент, мастер, админ)
-2. Прохождение полного бизнес-флоу (регистрация → KYC → создание задачи → котировки → оплата → выполнение → оценка)
-3. Документирование багов с детальными шагами воспроизведения
-4. Приоритизация по severity (Critical/High/Medium/Low) и priority (P1-P4)
-5. Ретест на чистой БД после исправлений
+**Process:**
+1. Create test accounts for customer, technician, and admin roles.
+2. Execute the full business flow: registration → KYC → task creation → quotes → payment → completion → rating.
+3. Document defects with detailed reproduction steps.
+4. Prioritize by severity, Critical/High/Medium/Low, and priority, P1–P4.
+5. Retest fixes on a clean database.
 
-**Особенности:**
-- Использовалась чистая БД для ретеста (без seed-данных)
-- Контролируемые транзакции для проверки метрик
-- Анализ Logcat для критичных багов
-- Проверка API responses через DevTools
+**Specific practices:**
+- Clean database used for retest, without seed data.
+- Controlled transactions created to validate metrics.
+- Logcat used for critical-defect analysis.
+- API responses checked through DevTools.
 
-## Окружение
+## Environment
 
-| Параметр | Значение |
+| Parameter | Value |
 |----------|----------|
-| Физическое устройство | Nothing Phone 1, Android 15 |
-| Эмулятор | Google Pixel 9a, Android 17 |
-| Версия приложения | Telaboro v2.1.0 |
-| Админ-панель | Google Chrome, EN интерфейс (автоперевод отключён) |
-| Бэкенд | NodeJS + Express + TypeScript |
-| База данных | PostgreSQL + PostGIS |
-| Платежи | Stripe (Test Mode) |
-| Real-time | SocketIO |
+| Physical device | Nothing Phone 1, Android 15 |
+| Emulator | Google Pixel 9a, Android 17 |
+| App version | Telaboro v2.1.0 |
+| Admin panel | Google Chrome, EN interface, automatic translation disabled |
+| Backend | Node.js + Express + TypeScript |
+| Database | PostgreSQL + PostGIS |
+| Payments | Stripe Test Mode |
+| Real-time | Socket.IO |
 | Push | Firebase Cloud Messaging |
 
-## Критерии приёмки
+## Acceptance criteria
 
-### Для релиза:
-- ✅ Все Critical баги исправлены
-- ✅ Все High баги исправлены
-- ✅ Критичные бизнес-флоу работают (регистрация, KYC, создание задач, оплата, чат)
-- ✅ Нет блокеров в админ-панели
+### Release criteria
+- ✅ All Critical defects fixed.
+- ✅ All High defects fixed.
+- ✅ Critical business flows work: registration, KYC, task creation, payment, chat.
+- ✅ No blockers remain in the admin panel.
 
-### Текущий статус:
-- ❌ **НЕ ГОТОВ К РЕЛИЗУ** — 2 Critical бага блокируют ключевые процессы (платежи, профиль мастера)
+### Current status
+- ❌ **NOT READY FOR RELEASE** — two Critical defects block core flows: payments and technician profile.
