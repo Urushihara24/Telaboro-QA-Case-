@@ -1,489 +1,415 @@
-# Баг-репорты ретеста (18 новых багов)
+# Retest Bug Reports — 18 New Defects
 
-## Critical (2)
+## Critical — 2
 
-### NB-003: Все платежи с картой зависают в Pending
+### NB-003: All card payments remain stuck in Pending
 
 **Severity:** Critical  
 **Priority:** P1  
 **Component:** Mobile-Client  
 **Module:** Payments/Stripe
 
-**Предусловия:**
-1. Аккаунт клиента создан
-2. Задача создана и котировка принята
-3. Статус задачи: PENDING PAYMENT
-4. Доступна тестовая карта 4242 08/27 253
+**Preconditions:**
+1. Customer account exists.
+2. Task exists and quote is accepted.
+3. Task status is PENDING PAYMENT.
+4. Stripe test card is available.
 
-**Шаги воспроизведения:**
-1. Залогиниться под клиентом
-2. Принять котировку → Complete payment
-3. Ввести карту 4242 08/27 253
-4. Пройти 3DS/biometric confirmation
-5. Вернуться в приложение
-6. Проверить статус платежа в админке (Payments)
+**Steps to reproduce:**
+1. Log in as customer.
+2. Accept a quote → Complete payment.
+3. Enter the Stripe test card.
+4. Complete 3DS/biometric confirmation.
+5. Return to the application.
+6. Check payment status in Admin → Payments.
 
-**Ожидаемый результат:** Платёж обработан, статус задачи = Paid/Assigned. В админке Total charged увеличивается.
+**Expected result:** payment is processed, task becomes Paid/Assigned, and Total charged increases in the admin panel.
 
-**Фактический результат:** Платёж зависает в Pending. В админке Payments: 1 waiting, Total charged: $0.00. В Logcat: 'Dropping pending result: RESULT_OK' — React Native теряет результат от PaymentLauncherConfirmationActivity.
+**Actual result:** payment remains Pending. Admin → Payments shows one waiting payment and Total charged: $0.00. Logcat contains `Dropping pending result: RESULT_OK`, meaning React Native loses the result returned by `PaymentLauncherConfirmationActivity`.
 
-**Root Cause:** React Native ActivityResultRegistry дропает результат нативного Stripe Activity. Stripe возвращает RESULT_OK, но приложение не получает данные платежа.
+**Root Cause evidence:** React Native `ActivityResultRegistry` drops the result from the native Stripe Activity. Stripe returns `RESULT_OK`, but the application does not receive the payment result.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15), Приложение Telaboro v2.1.0
+**Environment:** Nothing Phone 1, Android 15; Telaboro v2.1.0.
 
-**Визуальное описание UI:**
-- Админка Payments: карточки метрик показывают Total charged: $0.00 MXN, Total refunded: $0.00 MXN, Pending payments: 1 waiting (оранжевая иконка часов), Failed payments: 0, Open disputes: 0
-- Таблица Transactions: одна строка "Test" (Usuario Eliminado), тип "Diagnosis" (фиолетовый бейдж), статус "Pending" (оранжевый бейдж), Amount: $150.00, Stripe PI: pi_3U0T25R8abMwWCv..., Date: Aug 03, 2026, 11:04 PM
+**UI description:**
+- Payments metrics: Total charged $0.00 MXN, Total refunded $0.00 MXN, Pending payments 1 waiting, Failed payments 0, Open disputes 0.
+- Transactions contains one `Diagnosis` payment with `Pending` status and amount $150.00.
 
 **Logcat evidence:**
+```text
 01:05:51.857 ActivityTaskManager I START u0 {cmp=com.telaboro.app/com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity}
 01:05:53.271 ReactHost W ReactHost{0}.onHostResume(activity)
 01:05:53.563 ActivityResultRegistry W Dropping pending result for request fragment_2563bee1-0533-4527-ad9d-1b48d92a118f_rq#0: ActivityResult{resultCode=RESULT_OK, data=Intent { (has extras) }}
-
+```
 
 ---
 
-### NB-014: Краш TechnicianProfileScreen: Property 'country' doesn't exist
+### NB-014: TechnicianProfileScreen crash — Property `country` doesn't exist
 
 **Severity:** Critical  
 **Priority:** P1  
 **Component:** Mobile-Client  
 **Module:** Quotes/Technician Profile
 
-**Предусловия:**
-1. Аккаунт клиента создан
-2. Мастер отправил котировку
-3. Клиент находится на экране Quotes
+**Preconditions:**
+1. Customer account exists.
+2. Technician has sent a quote.
+3. Customer is on the Quotes screen.
 
-**Шаги воспроизведения:**
-1. Залогиниться под клиентом
-2. Перейти в Quotes
-3. Нажать на имя мастера для открытия публичного профиля
-4. Проверить экран и Logcat
+**Steps to reproduce:**
+1. Log in as customer.
+2. Open Quotes.
+3. Tap the technician name to open the public profile.
+4. Inspect the screen and Logcat.
 
-**Ожидаемый результат:** Открывается публичный профиль мастера с данными: имя, рейтинг, категории, локация
+**Expected result:** public technician profile opens with name, rating, categories, and location.
 
-**Фактический результат:** Экран ошибки: 'Something went wrong — Property country doesn't exist' с кнопкой Retry. При нажатии Retry цикл повторяется. В Logcat: ReferenceError: Property 'country' doesn't exist at TechnicianProfileScreen.
+**Actual result:** error screen displays `Something went wrong — Property 'country' doesn't exist` with a Retry button. Retry loops back to the same error. Logcat shows `ReferenceError: Property 'country' doesn't exist at TechnicianProfileScreen`.
 
-**Root Cause:** Компонент TechnicianProfileScreen обращается к свойству country, которого нет в ответе API.
+**Root Cause evidence:** `TechnicianProfileScreen` reads the `country` property, which is absent from the API response.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15) + Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
+**Environment:** Nothing Phone 1, Android 15 + Google Pixel 9a emulator, Android 17; Telaboro v2.1.0.
 
-**Визуальное описание UI:**
-- Чёрный экран с оранжевой иконкой взрыва 💥 по центру
-- Заголовок: "Something went wrong" (белый текст)
-- Подзаголовок: "Property 'country' doesn't exist" (серый текст)
-- Оранжевая кнопка "Retry" по центру
-- При нажатии Retry экран перезагружается и показывает ту же ошибку
+**UI description:**
+- Black screen with orange explosion icon.
+- `Something went wrong` title.
+- `Property 'country' doesn't exist` subtitle.
+- Orange `Retry` button; retry reproduces the error.
 
 **Logcat evidence:**
+```text
 00:51:55.435 ViewRootImpl E Attempt to call method from wrong thread. This will throw an exception in a future version.
 00:51:55.474 ReactNativeJS E { [ReferenceError: Property 'country' doesn't exist]
 00:51:55.474 ReactNativeJS E   componentStack: '\n    at TechnicianProfileScreen (address at index.android.bundle:1:3060116)'
 00:51:55.477 unknown:ReactNative E ReferenceError: Property 'country' doesn't exist
+```
 
-
-**Crash Reports в админке:** 4 новых краша, все со статусом "New" (красный бейдж), ошибка "ReferenceError: Property 'country' doesn't exist", платформа android 37, версия 2.1.0, 4 occurrences каждый.
+**Crash Reports:** four new crashes, all `New`, with the same `ReferenceError`, Android platform, app version 2.1.0.
 
 ---
 
-## High (5)
+## High — 5
 
-### NB-002: is_first_purchase всегда true для всех платежей
+### NB-002: `is_first_purchase` is always true
 
 **Severity:** High  
 **Priority:** P2  
 **Component:** Mobile-Technician  
 **Module:** Payments/Plans
 
-**Предусловия:**
-1. Аккаунт мастера создан и verified
-2. Мастер уже совершал покупки планов
-3. Все предыдущие платежи в статусе Pending
+**Preconditions:** technician is verified, previous plan purchases exist, and previous payments are Pending.
 
-**Шаги воспроизведения:**
-1. Залогиниться под техником
-2. Купить план Balance (100 quotes) — ввести карту
-3. Дождаться статуса Pending
-4. Купить ещё один план Balance
-5. Проверить в API response поле is_first_purchase
+**Steps to reproduce:**
+1. Log in as technician.
+2. Buy a Balance plan.
+3. Wait for the payment to remain Pending.
+4. Buy another plan.
+5. Inspect `is_first_purchase` in the API response.
 
-**Ожидаемый результат:** is_first_purchase: false для второго и последующих покупок
+**Expected result:** `is_first_purchase: false` for the second and subsequent purchases.
 
-**Фактический результат:** Всегда is_first_purchase: true. Логика смотрит на успешные транзакции, а их нет (все pending), поэтому каждая покупка считается первой.
+**Actual result:** `is_first_purchase` remains `true`. The logic appears to rely on successful transactions; because all previous payments are Pending, each order is treated as the first purchase.
 
-**Root Cause:** Баг в логике определения first purchase — проверяется только paid_at, а не наличие любого заказа.
+**Root Cause evidence:** first-purchase logic appears to check `paid_at` rather than the existence of previous orders.
 
-**Окружение:** Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
+**Environment:** Pixel 9a emulator, Android 17; Telaboro v2.1.0.
 
-**Визуальное описание API response:**
-- Массив из 3 объектов plan orders, все с полем `"is_first_purchase": true`
-- Первый заказ: plan_type "balance", quantity 100, base_price "29.99", final_price "29.99", created_at "2026-08-03T20:53:24.198Z", paid_at null
-- Второй заказ: plan_type "balance", quantity 100, base_price "29.99", final_price "29.99", created_at "2026-08-03T20:49:11.515Z", paid_at null
-- Третий заказ: plan_type "subscription", quantity 30, base_price "19.99", final_price "19.99", created_at "2026-08-03T20:46:34.418Z", paid_at null
+**API response description:** three plan-order objects all contain `"is_first_purchase": true`; prior orders have `paid_at: null`.
 
 ---
 
-### NB-004: Кнопка Complete payment не блокируется после первой попытки
+### NB-004: Complete payment remains active after the first attempt
 
 **Severity:** High  
 **Priority:** P2  
 **Component:** Mobile-Client  
 **Module:** Payments
 
-**Предусловия:**
-1. Клиент принял котировку
-2. Статус задачи: PENDING PAYMENT
-3. Первая попытка оплаты зависла в Pending
+**Preconditions:** quote accepted, task in PENDING PAYMENT, first attempt already stuck in Pending.
 
-**Шаги воспроизведения:**
-1. Нажать Complete payment → ввести карту → Pay
-2. Платёж зависает в Pending
-3. Снова нажать Complete payment → ввести другую карту → Pay
+**Steps to reproduce:**
+1. Select Complete payment → enter card → Pay.
+2. Wait for Pending.
+3. Select Complete payment again → use another card → Pay.
 
-**Ожидаемый результат:** Кнопка disabled после первой попытки ИЛИ переиспользование того же PaymentIntent
+**Expected result:** payment control becomes disabled after the first attempt or the same PaymentIntent is reused.
 
-**Фактический результат:** Кнопка остаётся активной. При повторной попытке создаётся новый PaymentIntent, ошибка от Stripe: 'You cannot confirm this PaymentIntent because it has already succeeded after being previously confirmed'.
+**Actual result:** the button remains active. A new PaymentIntent is created and Stripe reports: `You cannot confirm this PaymentIntent because it has already succeeded after being previously confirmed`.
 
-**Root Cause:** Фронт не блокирует кнопку и не переиспользует PaymentIntent.
+**Root Cause evidence:** frontend does not block repeated submission or reuse the existing PaymentIntent.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15), Приложение Telaboro v2.1.0
+**Environment:** Nothing Phone 1, Android 15; Telaboro v2.1.0.
 
 ---
 
-### NB-005: Рассинхрон статусов после удаления клиента
+### NB-005: Status desynchronization after customer deletion
 
 **Severity:** High  
 **Priority:** P2  
 **Component:** Mobile-Technician  
 **Module:** Tasks/Quotes
 
-**Предусловия:**
-1. Созданы аккаунты клиента и техника
-2. Клиент создал задачу, техник отправил котировку
-3. Клиент принял котировку (статус Accepted)
-4. Клиент удалил аккаунт
+**Preconditions:** customer and technician exist, quote was Accepted, then customer deletes the account.
 
-**Шаги воспроизведения:**
-1. Зайти под техником
-2. Проверить Inbox → задача со статусом Cancelled
-3. Проверить Quotes → задача со статусом Accepted
-4. Кликнуть на задачу в Quotes → детали показывают Cancelled
-5. Проверить счётчик Accepted в метриках
+**Steps to reproduce:**
+1. Log in as technician.
+2. Check Inbox: task shows Cancelled.
+3. Check Quotes: task shows Accepted.
+4. Open task from Quotes: details show Cancelled.
+5. Check the Accepted metric counter.
 
-**Ожидаемый результат:** Статус консистентен везде (Cancelled). Счётчик Accepted уменьшается.
+**Expected result:** status is consistently Cancelled everywhere and the Accepted counter decreases.
 
-**Фактический результат:** В Inbox: Cancelled. В Quotes: Accepted. При клике в Quotes → детали показывают Cancelled. Счётчик показывает 1 Accepted.
+**Actual result:** Inbox shows Cancelled; Quotes shows Accepted; details show Cancelled; Accepted counter remains 1.
 
-**Root Cause:** Рассинхрон между списком Quotes и деталями задачи. Бэкенд не обновляет статус котировки при удалении клиента.
+**Root Cause evidence:** Quotes list and task details use inconsistent state; backend quote status is not updated when the customer is deleted.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15) + Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
+**Environment:** physical Android device + Pixel 9a emulator; Telaboro v2.1.0.
 
 ---
 
-### NB-009: CalledFromWrongThreadException при навигации (RNScreens)
+### NB-009: CalledFromWrongThreadException during navigation — RNScreens
 
 **Severity:** High  
 **Priority:** P2  
 **Component:** Mobile  
 **Module:** Navigation
 
-**Предусловия:**
-1. Приложение запущено
-2. Пользователь переходит между экранами
+**Preconditions:** app is running and user navigates between screens.
 
-**Шаги воспроизведения:**
-1. Открыть приложение
-2. Перейти в Quotes
-3. Нажать на имя мастера
-4. Проверить Logcat
+**Steps to reproduce:**
+1. Open the app.
+2. Open Quotes.
+3. Tap technician name.
+4. Inspect Logcat.
 
-**Ожидаемый результат:** Навигация работает без ошибок в консоли
+**Expected result:** navigation works without thread-related runtime errors.
 
-**Фактический результат:** В Logcat: CalledFromWrongThreadException — UI обновляется из потока mqt_v_js вместо main. Stack trace: RNScreens Screen.startTransitionRecursive.
+**Actual result:** Logcat shows `CalledFromWrongThreadException`: UI is updated from `mqt_v_js` instead of the main thread. Stack points to `RNScreens Screen.startTransitionRecursive`.
 
-**Root Cause:** React Native Screens обновляет UI из неправильного потока при удалении экрана из навигации.
+**Root Cause evidence:** React Native Screens updates/removes UI from the wrong thread during a navigation transition.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15) + Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
+**Environment:** physical Android device + Pixel 9a emulator; Telaboro v2.1.0.
 
 **Logcat evidence:**
+```text
 01:00:52.613 ViewRootImpl E Attempt to call method from wrong thread. This will throw an exception in a future version.
 android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views. Expected: main Calling: mqt_v_js
 at com.swmansion.rnscreens.Screen.startTransitionRecursive(Screen.kt:501)
 at com.swmansion.rnscreens.Screen.startRemovalTransition(Screen.kt:463)
-
+```
 
 ---
 
-### NB-019: Невозможно отозвать конкретную роль у админа
+### NB-019: Cannot revoke an individual admin role
 
 **Severity:** High  
 **Priority:** P2  
 **Component:** Admin-Panel  
 **Module:** System/Admins/Manage Roles
 
-**Предусловия:**
-1. Админ залогинен с правами Super Admin
-2. В системе есть админ с несколькими ролями
-3. Открыта модалка 'Manage Roles'
+**Preconditions:** Super Admin is logged in; another admin has multiple roles; Manage Roles is open.
 
-**Шаги воспроизведения:**
-1. Открыть админку
-2. Перейти в System → Admins
-3. Нажать на иконку щита в колонке Actions для любого админа
-4. В модалке 'Manage Roles' попытаться удалить/отозвать любую из назначенных ролей
+**Steps to reproduce:**
+1. Open System → Admins.
+2. Select the shield action for an administrator.
+3. In Manage Roles, attempt to remove any assigned role.
 
-**Ожидаемый результат:** Рядом с каждой ролью есть кнопка 'Revoke' или иконка удаления
+**Expected result:** each assigned role provides a Revoke/remove action.
 
-**Фактический результат:** Кнопки удаления ролей отсутствуют. Единственный способ изменить набор ролей — удалить админа из списка Administrators и создать заново через '+ New Admin' с нужным набором ролей.
+**Actual result:** no role-removal control exists. The only available workaround is deleting the administrator from the Administrators list and recreating the account with a different role set.
 
-**Root Cause:** В модалке Manage Roles есть только кнопка '+ Assign Role', но нет кнопок отзыва ролей.
+**Root Cause evidence:** Manage Roles supports `+ Assign Role` but no role-revocation action.
 
-**Окружение:** Админ-панель (браузер Chrome, EN интерфейс, автоперевод отключён)
+**Environment:** Chrome admin panel, EN interface, automatic translation disabled.
 
-**Визуальное описание UI:**
-- Модалка "Manage Roles" с заголовком и именем админа
-- Секция "Assigned roles" с оранжевой кнопкой "+ Assign Role" справа
-- 4 карточки ролей:
-  1. Administrador de Finanzas — Assigned on 8/4/2026
-  2. Administrador de Soporte — Assigned on 8/4/2026
-  3. Administrador Técnico — Assigned on 8/4/2026
-  4. Super Administrador — Assigned on 8/3/2026
-- Каждая карточка имеет иконку щита слева, но НЕТ кнопок удаления справа
-- Внизу информационное сообщение: "Roles determine which sections and actions this administrator can use in the backoffice."
-- Кнопка "Close" в правом нижнем углу
+**UI description:**
+- `Manage Roles` modal with administrator name.
+- `Assigned roles` section and orange `+ Assign Role` button.
+- Multiple role cards with shield icons but no remove controls.
+- Informational note: `Roles determine which sections and actions this administrator can use in the backoffice.`
+- `Close` button.
 
-**Security impact:** При удалении и повторном создании админа теряется история действий в Audit log (Actor привязан к старому ID).
+**Security impact:** deleting and recreating an admin can break continuity in the Audit log because actions remain associated with the previous account ID.
 
 ---
 
-## Medium (6)
+## Medium — 6
 
-### NB-001: Поле телефона принимает буквы и спецсимволы
+### NB-001: Phone field accepts letters and special characters
 
 **Severity:** Medium  
 **Priority:** P3  
 **Component:** Mobile  
 **Module:** Registration/Profile
 
-**Предусловия:**
-1. Открыт экран регистрации или профиля
-2. Доступно поле ввода телефона
+**Preconditions:** registration/profile screen is open and phone input is available.
 
-**Шаги воспроизведения:**
-1. Открыть экран регистрации
-2. В поле телефона ввести: 123qwere123132412
-3. Сохранить профиль
+**Steps to reproduce:**
+1. Enter `123qwere123132412` into the phone field.
+2. Save the profile.
 
-**Ожидаемый результат:** Ошибка валидации или маска ввода, принимающая только цифры и формат +XX XXX XXX XXXX
+**Expected result:** validation error or a phone mask accepting only a valid phone format.
 
-**Фактический результат:** Значение 123qwere123132412 принимается без ошибок и сохраняется в профиль
+**Actual result:** the value is accepted and saved without validation.
 
-**Root Cause:** Отсутствует валидация на фронте и бэке. Поле принимает любой текст.
+**Root Cause evidence:** no effective frontend/backend validation is applied to the field.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15), Приложение Telaboro v2.1.0
+**Environment:** Nothing Phone 1, Android 15; Telaboro v2.1.0.
 
-**Визуальное описание UI:**
-- В админке Users таблица показывает пользователя с телефоном "123qwere123132412" под email
-- В таблице Technicians видно: "TEST TEST TEST TEST", телефон "16509:004646aaaa" (содержит буквы и двоеточие)
-- Другой техник: "NORGE GREGORIO SANTANA LEYVA", телефон "123456789"
+**UI evidence:** Users/Technicians tables contain saved values with letters, punctuation, or malformed phone formats.
 
 ---
 
-### NB-006: Платёж 2.5 MXN (Per quote) проходит в обход Stripe
+### NB-006: 2.5 MXN Per quote charge bypasses Stripe
 
 **Severity:** Medium  
 **Priority:** P3  
 **Component:** Mobile-Technician  
 **Module:** Payments/Plans
 
-**Предусловия:**
-1. Аккаунт мастера создан, уровень Bronce (0 free quotes)
-2. Клиент принимает котировку мастера
+**Preconditions:** technician is Bronce with 0 free quotes; customer accepts the technician's quote.
 
-**Шаги воспроизведения:**
-1. Залогиниться под техником
-2. Клиент принимает котировку
-3. Проверить Plan Orders в админке
-4. Посчитать количество заказов Per quote и общую сумму
+**Steps to reproduce:**
+1. Let customer accept the quote.
+2. Open Admin → Plan Orders.
+3. Count Per quote orders and total amount.
+4. Verify whether card entry occurred.
 
-**Ожидаемый результат:** Платёж за Per quote проходит через Stripe с вводом карты, либо используется free allowance согласно уровню
+**Expected result:** Per quote payment goes through Stripe/card flow or consumes free allowance according to the level rules.
 
-**Фактический результат:** 11 заказов Per quote по $2.50 = $27.50, все Paid, без ввода карты. При уровне Bronce free allowance = 0, но платежи проходят автоматически.
+**Actual result:** 11 Per quote orders at $2.50 each, $27.50 total, are all marked Paid without card input, even though Bronce free allowance is 0.
 
-**Root Cause:** Логика списания за котировки работает в обход Stripe. Возможно, используется внутренний баланс или баг в расчёте allowance.
+**Root Cause hypothesis:** quote-charge logic appears to bypass Stripe, potentially through internal balance logic or an allowance-calculation defect.
 
-**Окружение:** Админ-панель (браузер Chrome, EN интерфейс, автоперевод отключён)
+**Environment:** Chrome admin panel, EN interface.
 
-**Визуальное описание UI:**
-- Plan Orders dashboard: Total revenue $27.50 (11 paid orders), Subscriptions: 1, Prepaid: 3, Per quote: 11 (+ 0 gratuitas)
-- Таблица показывает 11 строк от мастера "TEST TEST TEST TEST" (Bronce):
-  - Каждая строка: план "Per quote" (оранжевый бейдж), 1 quote, Base price $2.50, Discount —, Credits used —, Total $2.50
-  - Статус "Paid" (зелёный) с датой
-  - Кнопка "Send to tickets" у каждой строки
-- Даты заказов: Aug 04 12:05 AM, Aug 03 11:50 PM, Aug 03 11:49 PM (×9)
+**UI description:** Plan Orders shows Total revenue $27.50, 11 paid orders, and 11 Per quote items at $2.50 each, all Paid.
 
 ---
 
-### NB-007: Cancelled задачи засоряют Inbox мастера
+### NB-007: Cancelled tasks clutter the technician Inbox
 
 **Severity:** Medium  
 **Priority:** P3  
 **Component:** Mobile-Technician  
 **Module:** Inbox
 
-**Предусловия:**
-1. Клиент создал задачу
-2. Мастер видит её в Inbox
-3. Клиент удалил аккаунт или отменил задачу
-4. Задача перешла в статус Cancelled
+**Preconditions:** a task visible in Inbox becomes Cancelled after customer deletion or task cancellation.
 
-**Шаги воспроизведения:**
-1. Зайти под техником
-2. Открыть Inbox
-3. Найти задачу со статусом Cancelled
-4. Попытаться откликнуться на неё
+**Steps to reproduce:**
+1. Log in as technician.
+2. Open Inbox.
+3. Find the Cancelled task.
+4. Attempt to interact with it.
 
-**Ожидаемый результат:** Cancelled задачи скрыты из Inbox по умолчанию ИЛИ имеют визуальное отличие и без возможности взаимодействия
+**Expected result:** Cancelled tasks are hidden by default or clearly separated as non-actionable.
 
-**Фактический результат:** Cancelled задачи видны в Inbox наравне с активными, без визуального отличия, без возможности откликнуться.
+**Actual result:** Cancelled tasks remain mixed with active Inbox items without visual distinction and cannot be responded to.
 
-**Root Cause:** Фронт не фильтрует Cancelled задачи из списка Inbox.
+**Root Cause evidence:** frontend does not filter or visually separate Cancelled tasks.
 
-**Окружение:** Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
+**Environment:** Pixel 9a emulator, Android 17; Telaboro v2.1.0.
 
 ---
 
-### NB-010: Stripe: Unable to set card brand tint color
+### NB-010: Stripe — Unable to set card brand tint color
 
 **Severity:** Medium  
 **Priority:** P3  
 **Component:** Mobile-Client  
 **Module:** Payments/Stripe
 
-**Предусловия:**
-1. Открыт экран Checkout
-2. Вводится номер карты
+**Preconditions:** Checkout is open and a card number is being entered.
 
-**Шаги воспроизведения:**
-1. Открыть Checkout
-2. Ввести номер карты 4242
-3. Проверить Logcat
+**Steps to reproduce:**
+1. Open Checkout.
+2. Enter a Visa test-card prefix such as `4242`.
+3. Inspect Logcat.
 
-**Ожидаемый результат:** Иконка бренда карты (Visa/Mastercard) отображается с корректным цветом
+**Expected result:** card-brand icon is displayed using the expected styling without SDK errors.
 
-**Фактический результат:** В Logcat повторяется ошибка: 'Unable to set card brand tint color: com.stripe.android.view.CardBrandView.setTintColorInt'. Иконка может отображаться некорректно.
+**Actual result:** Logcat repeatedly reports `Unable to set card brand tint color: com.stripe.android.view.CardBrandView.setTintColorInt`; the icon may render incorrectly.
 
-**Root Cause:** Баг в Stripe React Native SDK при установке цвета бренда карты.
+**Root Cause evidence:** Stripe React Native SDK tint application fails for the card-brand view.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15), Приложение Telaboro v2.1.0
+**Environment:** Nothing Phone 1, Android 15; Telaboro v2.1.0.
 
 **Logcat evidence:**
+```text
 01:05:36.561 StripeReactNative E Unable to set card brand tint color: com.stripe.android.view.CardBrandView.setTintColorInt$payments_core_release [int]
-
+```
 
 ---
 
-### NB-016: Два статуса одновременно: Active + Blocked у пользователя
+### NB-016: User displays Active + Blocked simultaneously
 
 **Severity:** Medium  
 **Priority:** P3  
 **Component:** Admin-Panel  
 **Module:** Users
 
-**Предусловия:**
-1. Админ залогинен
-2. Аккаунт клиента заблокирован после неудачных попыток входа
+**Preconditions:** administrator is logged in and a customer account has been blocked after failed login attempts.
 
-**Шаги воспроизведения:**
-1. Открыть админку
-2. Перейти в Users
-3. Найти заблокированного пользователя
-4. Проверить колонку Status
+**Steps to reproduce:**
+1. Open Admin → Users.
+2. Find the blocked user.
+3. Inspect the Status column.
 
-**Ожидаемый результат:** Один статус: либо Active, либо Blocked
+**Expected result:** one coherent status, either Active or Blocked.
 
-**Фактический результат:** У пользователя отображаются два статуса одновременно: Active (зелёный) и Blocked (красный).
+**Actual result:** both Active and Blocked badges are shown in the same status cell.
 
-**Root Cause:** Логическая ошибка в UI — пользователь не может быть одновременно активным и заблокированным.
+**Root Cause evidence:** UI status logic allows mutually exclusive states to render together.
 
-**Окружение:** Админ-панель (браузер Chrome, EN интерфейс, автоперевод отключён)
-
-**Визуальное описание UI:**
-- Таблица Users, первая строка: "TEST TEST TEST TEST", телефон 123qwere123132412
-- Колонка Status показывает ДВА бейджа:
-  - "Active" (зелёный круг + зелёный текст)
-  - "Blocked" (красный круг с замком + красный текст)
-- Оба бейджа отображаются одновременно в одной ячейке
+**Environment:** Chrome admin panel, EN interface.
 
 ---
 
-### NB-017: Несоответствие сумм: задача $123.00, платёж $150.00
+### NB-017: Task amount $123.00 does not match payment amount $150.00
 
 **Severity:** Medium  
 **Priority:** P3  
 **Component:** Admin-Panel  
 **Module:** Tasks/Payments
 
-**Предусловия:**
-1. Админ залогинен
-2. Есть задача с котировкой $123.00
-3. Создан платёж Diagnosis
+**Preconditions:** task with $123 quote exists and a Diagnosis payment was created.
 
-**Шаги воспроизведения:**
-1. Открыть админку
-2. Перейти в Tasks → найти задачу Test
-3. Проверить сумму Amount: $123.00
-4. Перейти в Payments → найти платёж за задачу Test
-5. Проверить сумму Amount: $150.00
+**Steps to reproduce:**
+1. Open Tasks and find the target task; note Amount $123.00.
+2. Open Payments and find the payment for the same task; note Amount $150.00.
+3. Compare values.
 
-**Ожидаемый результат:** Сумма задачи и платежа совпадают
+**Expected result:** task and payment amounts are consistent according to documented business rules.
 
-**Фактический результат:** В Tasks сумма задачи Test: $123.00. В Payments сумма платежа за задачу Test: $150.00. Разница $27.00.
+**Actual result:** task amount is $123.00 while the Diagnosis payment is $150.00, a $27 difference.
 
-**Root Cause:** Платёж Diagnosis fee ($150.00) не совпадает с суммой котировки ($123.00). Возможно, Diagnosis fee — это отдельная фиксированная сумма.
+**Root Cause hypothesis:** Diagnosis fee may be a separate fixed amount; business logic needs clarification before final defect closure.
 
-**Окружение:** Админ-панель (браузер Chrome, EN интерфейс, автоперевод отключён)
-
-**Визуальное описание UI:**
-- Tasks таблица: строка "Test", статус "Cancelled" (красный бейдж), тип "On-site", клиент "Usuario Eliminado", техник "TEST TEST TEST TEST" (★ 0.0), Amount: $123.00, Quotes: 1
-- Payments таблица: строка "Test" (Usuario Eliminado), тип "Diagnosis" (фиолетовый бейдж), статус "Pending" (оранжевый бейдж), Amount: $150.00, Stripe PI: pi_3U0T25R8abMwWCv..., Date: Aug 03, 2026, 11:04 PM
+**Environment:** Chrome admin panel, EN interface.
 
 ---
 
-## Low (5)
+## Low — 5
 
-### NB-011: RNScreens iOS-props on Android
+### NB-011: RNScreens iOS-only props on Android
 
 **Severity:** Low  
 **Priority:** P4  
 **Component:** Mobile  
 **Module:** Navigation
 
-**Предусловия:**
-1. Приложение запущено на Android
+**Preconditions:** application runs on Android.
 
-**Шаги воспроизведения:**
-1. Открыть приложение
-2. Перейти между экранами
-3. Проверить Logcat
+**Steps to reproduce:** navigate between screens and inspect Logcat.
 
-**Ожидаемый результат:** В Logcat нет предупреждений о недоступных props
+**Expected result:** no warnings about unavailable props.
 
-**Фактический результат:** В Logcat повторяются предупреждения: backTitleVisible, backTitleFontFamily, disableBackButtonMenu, largeTitleFontFamily, largeTitleFontWeight, largeTitleHideShadow — prop is not available on Android.
+**Actual result:** repeated warnings for `backTitleVisible`, `backTitleFontFamily`, `disableBackButtonMenu`, `largeTitleFontFamily`, `largeTitleFontWeight`, and `largeTitleHideShadow`, all unavailable on Android.
 
-**Root Cause:** В коде используются iOS-специфичные свойства RNScreens, которые игнорируются на Android.
+**Root Cause evidence:** iOS-specific RNScreens properties are configured in the Android flow.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15) + Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
-
-**Logcat evidence:**
-[RNScreens] W backTitleVisible prop is not available on Android
-[RNScreens] W backTitleFontFamily prop is not available on Android
-[RNScreens] W disableBackButtonMenu prop is not available on Android
-[RNScreens] W largeTitleFontFamily prop is not available on Android
-[RNScreens] W largeTitleFontWeight prop is not available on Android
-[RNScreens] W largeTitleHideShadow prop is not available on Android
-
+**Environment:** physical Android device + Pixel 9a emulator; Telaboro v2.1.0.
 
 ---
 
@@ -494,120 +420,79 @@ at com.swmansion.rnscreens.Screen.startRemovalTransition(Screen.kt:463)
 **Component:** Mobile  
 **Module:** Analytics
 
-**Предусловия:**
-1. Приложение запущено
-2. Firebase Messaging настроен
+**Preconditions:** app is running and Firebase Messaging is configured.
 
-**Шаги воспроизведения:**
-1. Открыть приложение
-2. Дождаться push-уведомления
-3. Проверить Logcat
+**Steps to reproduce:** wait for a push notification and inspect Logcat.
 
-**Ожидаемый результат:** Firebase Analytics работает, события логируются
+**Expected result:** analytics events log without errors.
 
-**Фактический результат:** В Logcat: 'FirebaseMessaging W Unable to log event: analytics library is missing'. Push работают, но аналитика событий — нет.
+**Actual result:** Logcat reports `FirebaseMessaging W Unable to log event: analytics library is missing`. Push delivery works, but analytics event logging does not.
 
-**Root Cause:** Firebase Analytics не подключён к проекту.
+**Root Cause evidence:** Firebase Analytics is not included/configured in the project.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15) + Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
-
-**Logcat evidence:**
-FirebaseMessaging W Unable to log event: analytics library is missing
-
+**Environment:** physical Android device + Pixel 9a emulator; Telaboro v2.1.0.
 
 ---
 
-### NB-013: OnBackInvokedCallback not enabled
+### NB-013: OnBackInvokedCallback is not enabled
 
 **Severity:** Low  
 **Priority:** P4  
 **Component:** Mobile  
 **Module:** Navigation
 
-**Предусловия:**
-1. Приложение запущено на Android 13+
+**Preconditions:** Android 13+ device.
 
-**Шаги воспроизведения:**
-1. Открыть приложение
-2. Использовать gesture назад
-3. Проверить Logcat
+**Steps to reproduce:** use the back gesture and inspect Logcat.
 
-**Ожидаемый результат:** Предиктивный back gesture работает корректно
+**Expected result:** predictive back behavior works without warnings.
 
-**Фактический результат:** В Logcat: 'OnBackInvokedCallback is not enabled for the application. Set android:enableOnBackInvokedCallback=true in the application manifest.'
+**Actual result:** Logcat reports `OnBackInvokedCallback is not enabled for the application. Set android:enableOnBackInvokedCallback=true in the application manifest.`
 
-**Root Cause:** В AndroidManifest.xml не добавлен флаг enableOnBackInvokedCallback.
+**Root Cause evidence:** `android:enableOnBackInvokedCallback` is not enabled in the application manifest.
 
-**Окружение:** Android устройство (Nothing Phone 1, Android 15) + Android эмулятор (Google Pixel 9a, Android 17), Приложение Telaboro v2.1.0
-
-**Logcat evidence:**
-WindowOnBackDispatcher W OnBackInvokedCallback is not enabled for the application.
-Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-
+**Environment:** physical Android device + Pixel 9a emulator; Telaboro v2.1.0.
 
 ---
 
-### NB-015: Легенда графика в Ticket Reports на испанском
+### NB-015: Ticket Reports chart legend remains in Spanish
 
 **Severity:** Low  
 **Priority:** P4  
 **Component:** Admin-Panel  
 **Module:** Analytics/Ticket Reports
 
-**Предусловия:**
-1. Админ залогинен
-2. Интерфейс на EN
+**Preconditions:** admin is logged in and interface language is EN.
 
-**Шаги воспроизведения:**
-1. Открыть админку
-2. Перейти в Analytics → Ticket Reports
-3. Проверить легенду графика 'Created vs Resolved per day'
+**Steps to reproduce:** open Analytics → Ticket Reports and inspect the legend for `Created vs Resolved per day`.
 
-**Ожидаемый результат:** Легенда на английском: Created / Resolved
+**Expected result:** legend is English: Created / Resolved.
 
-**Фактический результат:** Легенда на испанском: Creados / Resueltos. Заголовки таблицы и карточек на английском.
+**Actual result:** legend remains Spanish: `Creados / Resueltos`, while surrounding headings are English.
 
-**Root Cause:** Неполное исправление бага i18n. Легенда графика не переведена.
+**Root Cause evidence:** incomplete i18n coverage for chart legend strings.
 
-**Окружение:** Админ-панель (браузер Chrome, EN интерфейс, автоперевод отключён)
-
-**Визуальное описание UI:**
-- Страница Ticket Reports, заголовок "Created vs Resolved per day" на английском
-- График линейный с двумя линиями: синяя (Creados) и зелёная (Resueltos)
-- Легенда под графиком: "Creados" (синий) и "Resueltos" (зелёный) — на ИСПАНСКОМ
-- Таблица "KPIs by assigned admin" с заголовками на английском: Admin, Assigned, Resolved, Open, SLA %, Avg. time, Reminders
+**Environment:** Chrome admin panel, EN interface.
 
 ---
 
-### NB-018: 0 transacciones в Escrow (остаток i18n)
+### NB-018: `0 transacciones` remains in Escrow
 
 **Severity:** Low  
 **Priority:** P4  
 **Component:** Admin-Panel  
 **Module:** Operations/Escrow
 
-**Предусловия:**
-1. Админ залогинен
-2. Интерфейс на EN
+**Preconditions:** admin is logged in and interface language is EN.
 
-**Шаги воспроизведения:**
-1. Открыть админку
-2. Перейти в Operations → Escrow
-3. Проверить подпись под метрикой 'In escrow'
+**Steps to reproduce:** open Operations → Escrow and inspect the subtitle under `In escrow`.
 
-**Ожидаемый результат:** Подпись на английском: 0 transactions
+**Expected result:** `0 transactions` in English.
 
-**Фактический результат:** Подпись на испанском: 0 transacciones. Заголовок карточки на английском.
+**Actual result:** subtitle remains Spanish: `0 transacciones`, while card headings are English.
 
-**Root Cause:** Неполное исправление бага i18n. Подпись метрики не переведена.
+**Root Cause evidence:** incomplete i18n coverage for the metric subtitle.
 
-**Окружение:** Админ-панель (браузер Chrome, EN интерфейс, автоперевод отключён)
+**Environment:** Chrome admin panel, EN interface.
 
-**Визуальное описание UI:**
-- Страница Escrow, 5 карточек метрик:
-  - In escrow: 0.00 MXN (синяя иконка замка), подпись "0 transacciones" — на ИСПАНСКОМ
-  - Released: 0.00 MXN (зелёная иконка щита)
-  - Refunded: 0.00 MXN (фиолетовая иконка)
-  - Fees collected: 0.00 MXN (оранжевая иконка графика)
-  - Open disputes: 0 (красная иконка предупреждения)
-- Все заголовки карточек на английском, но подпись под первой карточкой на испанском
+**UI description:** the Escrow page contains five metric cards; the first card reads `In escrow: 0.00 MXN` with the Spanish subtitle `0 transacciones`, while the other visible headings remain English.
