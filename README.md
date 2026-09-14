@@ -1,6 +1,6 @@
-# Telaboro QA Case Study
+# Telaboro — Commercial QA Project
 
-> End-to-end QA investigation of an Android marketplace and its web admin panel, covering API, PostgreSQL, Stripe, real-time flows, and mobile diagnostics.
+> Paid commercial QA engagement for an Android marketplace and its web admin panel, covering API, PostgreSQL, Stripe, real-time flows, and mobile diagnostics.
 
 <p align="center">
   <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native">
@@ -152,9 +152,9 @@
 
 ---
 
-## 💡 Lessons learned
+## 💡 Technical conclusions
 
-1. **Stripe integration** — verify both webhook behavior and ActivityResult handling when React Native interacts with native modules.
+1. **Stripe integration** — both webhook behavior and ActivityResult handling must be verified when React Native interacts with native modules.
 2. **React Native + native modules** — cross-layer data transfer is a frequent defect boundary.
 3. **Clean database for retest** — necessary to validate metrics without noise from seeded data.
 4. **i18n** — a system-wide issue requires one consistent translation dictionary across UI, data, legends, and filters.
@@ -180,5 +180,5 @@
 
 ---
 
-*Project completed in August 2026.*  
+*Paid commercial QA project completed in August 2026.*  
 *Screenshots and videos are not included because they contain confidential application data. Defects contain detailed textual UI descriptions and sanitized Logcat evidence instead.*
