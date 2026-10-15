@@ -176,7 +176,7 @@
 ## 📞 Contacts
 
 **LinkedIn:** [Vsevolod Samoylov](https://www.linkedin.com/in/vsevolod-samoylov)  
-**Telegram:** @urushihara24
+**Telegram:** @vsevolod_qa
 
 ---
 
