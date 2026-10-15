@@ -173,10 +173,11 @@
 
 ---
 
-## 📞 Contacts
+## 📞 Contact & portfolio
 
-**LinkedIn:** [Vsevolod Samoylov](https://www.linkedin.com/in/vsevolod-samoylov)  
-**Telegram:** @vsevolod_qa
+**Portfolio:** [vsevolodqa.ru](https://vsevolodqa.ru/)  
+**Telegram:** [@vsevolod_qa](https://t.me/vsevolod_qa)  
+**GitHub:** [Urushihara24](https://github.com/Urushihara24)
 
 ---
 
